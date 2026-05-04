@@ -126,7 +126,7 @@ Reference links are listed in [references.md](./references.md).
 - Credentials, API keys, tokens, or secrets
 - Instructions to exploit real systems
 
-## Recruiter-Friendly Summary
+## Summary
 
 This project demonstrates practical AI security engineering and GRC capability in one portfolio artifact.
 It shows that I can:
@@ -135,4 +135,3 @@ It shows that I can:
 - quantify residual risk,
 - and communicate remediation priorities in an audit-ready format.
 
-The repository is intentionally public-safe, evidence-led, and suitable for AI Security Engineer and GRC Analyst role discussions.
