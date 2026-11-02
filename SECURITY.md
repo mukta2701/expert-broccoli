@@ -17,10 +17,13 @@ logs, even in a private report. Use sanitised examples and harmless canaries.
 
 ## Authorised use
 
-Only the local mock chatbot in `ai-prompt-injection-security-testing/mock_app/`
-may be tested with this repository's tooling. Do not target production services,
-employer systems, or any real or third-party system. This repository grants no
-authorisation to test those systems.
+You may test the local mock chatbot in `ai-prompt-injection-security-testing/mock_app/`
+and models you run yourself on your own machine (the adapter accepts loopback
+addresses without an extra flag). Any other target needs the explicit
+authorisation flag and written permission from its owner. Do not target
+production services, employer systems, or any third-party system you do not
+have permission to test. This repository grants no authorisation to test those
+systems.
 
 All examples and evidence must remain synthetic. See the project's
 [disclaimer](ai-prompt-injection-security-testing/DISCLAIMER.md) for the content
