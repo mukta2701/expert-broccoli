@@ -41,6 +41,14 @@ FORMS = {
     'body': 'pr view <N> --json body,headRefOid',
     'metadata': 'pr view <N> --json files,labels,body,additions,deletions,changedFiles',
     'state': 'issue view <N> --json state --jq .state',
+    'prs-open': 'pr list --state open --limit 100 --json number,title,body,url,headRefName,files',
+    'prs-merged': 'pr list --state merged --limit 100 --json number,title,body,url',
+    'issues-closed': 'issue list --state closed --limit 100 --json number,title,body,stateReason',
+    'dedupe': 'issue list --state all --limit 199 --json number,title,body (fewer than 200 issues)',
+    'scalar': '<gh args> (non-empty plain output, e.g. with --jq .field)',
+    'issue-number': '<gh args> (prints one positive integer, or nothing)',
+    'object': '<gh args> (a non-empty JSON object)',
+    'array': '<gh args> (a JSON list, may be empty)',
     'diff': 'pr diff <N> (and pass --meta <file> saved from: pr view <N> --json files,labels,body,additions,deletions,changedFiles)',
 }
 
