@@ -1,0 +1,13 @@
+{
+  "tool_version": "0.2.0",
+  "cases_sha256": "381a05bdb335fa53d0efe06e492c74a9217348b1ac8050108ea8dd0109ffa4e1",
+  "scorer_version": "canary-expectation-1.0",
+  "baseline_scorer_version": "substring-1.0",
+  "seed": 0,
+  "mode": "safe",
+  "target": "openai_compat",
+  "model": "llama3.2:3b",
+  "temperature": 0.2,
+  "trials": 5,
+  "timestamp_utc": "2026-11-02T22:56:24.964007+00:00"
+}
