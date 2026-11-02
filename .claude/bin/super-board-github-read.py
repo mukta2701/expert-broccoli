@@ -112,6 +112,13 @@ def permanent_error(text):
                      r'Could not resolve to (?:a|an) |missing required scopes', text, re.I) is not None
 
 
+def usage_error(text):
+    """gh rejected the command line itself (bad or conflicting flags): the caller's mistake, not an outage."""
+    return re.search(r'option is not supported with|unknown flag|unknown command|unknown shorthand flag|'
+                     r'flag needs an argument|accepts \d+ arg|requires? (?:at least|exactly) \d+ arg|'
+                     r'required flag|invalid argument|^Usage:', text, re.I | re.M) is not None
+
+
 def require(condition, why):
     if not condition:
         raise ValueError(why)
@@ -291,6 +298,9 @@ def read(args, kind='json', meta=None, recovering=False):
                     diagnostic += json.dumps([p.get('errors', []) for p in (payload if isinstance(payload, list) else [payload]) if isinstance(p, dict)])
                 except ValueError:
                     pass
+            if result.returncode and usage_error(result.stderr) and not os.environ.get('SB_GITHUB_READ_STRICT'):
+                first = next((line for line in result.stderr.splitlines() if line.strip()), 'invalid gh usage')
+                raise ValueError(f'gh rejected this command: {first}; this call failed, the run continues. Fix the flags and retry')
             if permanent_error(diagnostic):
                 halt('GitHub rejected a required read (query, authentication, or permission error); fix it before restarting', attempt, operation)
             if result.returncode:
