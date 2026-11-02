@@ -22,6 +22,7 @@ from tester.stats import wilson_interval  # noqa: E402
 DEFAULT_CROSSWALK = PROJECT_ROOT / "data" / "framework_crosswalk.json"
 MD_SPECIAL = set("\\`*_[]()!|~#")
 RESPONSE_LIMIT = 300
+VALUE_LIMIT = 500
 
 
 def clean(value, limit: int | None = None) -> str:
@@ -64,7 +65,7 @@ def ordered_results(summary: dict) -> list:
 
 
 def _join(items) -> str:
-    return ", ".join(esc(i) for i in items) if items else "none"
+    return ", ".join(esc(i, VALUE_LIMIT) for i in items) if items else "none"
 
 
 def _rate(item: dict) -> str | None:
@@ -119,11 +120,11 @@ def render_report(summary: dict, crosswalk: dict, now: str | None = None) -> str
          f"- PASS: {summary['pass_count']} | PARTIAL: {summary['partial_count']} | FAIL: {summary['fail_count']}",
          f"- Average exposure-adjusted residual risk (illustrative prioritisation score): "
          f"{summary['average_exposure_adjusted_residual_risk']}",
-         f"- Overall risk posture: {esc(summary['overall_risk_posture'])}",
+         f"- Overall risk posture (illustrative label): {esc(summary['overall_risk_posture'])}",
          f"- Scorer disagreements: {summary['scorer_disagreement_count']}", "",
          "## Run manifest", ""]
     for key, value in manifest_items(manifest):
-        L.append(f"- {key}: `{esc(value)}`")
+        L.append(f"- {key}: `{esc(value, VALUE_LIMIT)}`")
     L += ["", "## Risk register", "",
           "Sorted by exposure-adjusted risk, highest first.", "",
           "| Rank | ID | Family | Outcome | Adjusted risk | Blast radius | Controls |",

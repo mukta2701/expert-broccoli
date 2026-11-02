@@ -187,6 +187,21 @@ class HtmlReportTests(unittest.TestCase):
         self.assertIn("&lt;script&gt;", text)
         self.assertIn("&quot;quoted&quot;", text)
 
+    def test_posture_caption_and_scroll_rule(self):
+        self.assertIn("Overall risk posture (illustrative label)", self.html())
+        self.assertIn("Overall risk posture (illustrative label)", render_report(self.runs["safe"], self.crosswalk))
+        self.assertIn(".scroll{overflow-x:auto}", self.html())
+
+    def test_long_values_are_capped(self):
+        run = copy.deepcopy(self.runs["unsafe"])
+        run["results"][0]["blast_radius"] = ["x" * 100000]
+        run["manifest"]["model"] = "m" * 100000
+        for text in (render_html(run, self.crosswalk), render_report(run, self.crosswalk)):
+            self.assertLess(len(text), 200000)
+            self.assertNotIn("x" * 600, text)
+            self.assertNotIn("m" * 600, text)
+            self.assertIn("...", text)
+
     def test_cli_html_to_file_twice_identical(self):
         with TemporaryDirectory() as tmp:
             path = Path(tmp) / "r.json"

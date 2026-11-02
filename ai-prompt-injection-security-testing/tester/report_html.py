@@ -11,7 +11,7 @@ import hashlib
 import json
 from datetime import datetime, timezone
 
-from tester.report import (DEFAULT_CROSSWALK, RESPONSE_LIMIT, _rate, clean,  # noqa: F401
+from tester.report import (DEFAULT_CROSSWALK, RESPONSE_LIMIT, VALUE_LIMIT, _rate, clean,  # noqa: F401
                            limits_text, manifest_items, ordered_results, validate)
 
 CSS = """
@@ -60,8 +60,10 @@ dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 16px;margin:8px 0}
 dt{color:var(--muted)}dd{margin:0}
 code,pre{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.88rem}
 blockquote{margin:4px 0;padding:6px 12px;border-left:4px solid var(--line);background:var(--bg)}
+.scroll{overflow-x:auto}
 .limits{background:var(--card);border:2px solid var(--accent);border-radius:10px;padding:8px 20px 12px}
 footer{margin-top:40px;color:var(--muted);font-size:.9rem}
+@media (min-width:641px){th,td[data-label="Rank"],td[data-label="ID"]{white-space:nowrap}td[data-label="ID"]{min-width:4.5em}}
 @media (max-width: 640px){
  dl{grid-template-columns:1fr}
  table.stack thead{position:absolute;left:-999px}
@@ -83,7 +85,7 @@ OUT = {"FAIL": ("&#10007; ", "out-fail"), "PARTIAL": ("&#9680; ", "out-partial")
        "PASS": ("&#10003; ", "out-pass")}
 
 
-def h(value, limit=None):
+def h(value, limit=VALUE_LIMIT):
     return clean(value, limit)
 
 
@@ -238,7 +240,7 @@ def render_html(summary: dict, crosswalk: dict, now: str | None = None, scorer=N
 <section aria-labelledby="summary"><h2 id="summary">Summary</h2>
 <ul class="tiles">
 <li class="tile tile-score"><span class="n">{h(summary["average_exposure_adjusted_residual_risk"])}</span><span class="l">Average exposure-adjusted residual risk (illustrative prioritisation score)</span></li>
-<li class="tile"><span class="n">{h(summary["overall_risk_posture"])}</span><span class="l">Overall risk posture</span></li>
+<li class="tile"><span class="n">{h(summary["overall_risk_posture"])}</span><span class="l">Overall risk posture (illustrative label)</span></li>
 {tile_html}</ul></section>
 <section aria-labelledby="register"><h2 id="register">Risk register</h2>
 <p class="muted">Sorted by exposure-adjusted risk, highest first. Severity and outcome are shown as text and shape as well as colour.</p>
