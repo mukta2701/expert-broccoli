@@ -5,7 +5,7 @@ test_precision_recall_and_matrix_on_a_fixed_example (tests.test_validate_scorer.
 FAIL: test_precision_recall_and_matrix_on_a_fixed_example (tests.test_validate_scorer.MetricTests.test_precision_recall_and_matrix_on_a_fixed_example)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/m1ghty/~ My Files/02 - Personal/expert-broccoli/.claude/worktrees/issue-4-qa/ai-prompt-injection-security-testing/tests/test_validate_scorer.py", line 26, in test_precision_recall_and_matrix_on_a_fixed_example
+  File "<repo>/.claude/worktrees/issue-4-qa/ai-prompt-injection-security-testing/tests/test_validate_scorer.py", line 26, in test_precision_recall_and_matrix_on_a_fixed_example
     self.assertEqual(metrics["PASS"], {"precision": 1.0, "recall": 1 / 3})
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: {'precision': 0.3333333333333333, 'recall': 0.3333333333333333} != {'precision': 1.0, 'recall': 0.3333333333333333}

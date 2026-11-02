@@ -52,10 +52,10 @@ The mock gives deterministic output: safe mode scores 16 PASS (average residual 
 ```bash
 python3 -m tester.test_runner --target openai_compat \
   --base-url http://localhost:11434/v1 --model llama3.2:3b \
-  --trials 5 --temperature 0.2 --output model_results.json
+  --trials 5 --temperature 0.2 --timeout 180 --output model_results.json
 ```
 
-This sends each prompt to an OpenAI-compatible chat endpoint (Ollama is what I used). Loopback addresses need no extra flag. Any other target needs `--i-have-authorization` and written permission from its owner; see [SECURITY.md](../SECURITY.md). The adapter sends one user message per prompt, no system prompt, and does not send the canary. It disables proxies and redirects and never retries. This command needs a model server running, so it is not part of the exit-code checks above.
+Small local models can be slow on long replies, and a single request that exceeds the socket timeout (30 seconds by default) aborts the whole run without saving any output, so `--timeout 180` raises the limit. The `mode` field in the saved results is the mock's behaviour flag and is ignored for real models. This sends each prompt to an OpenAI-compatible chat endpoint (Ollama is what I used). Loopback addresses need no extra flag. Any other target needs `--i-have-authorization` and written permission from its owner; see [SECURITY.md](../SECURITY.md). The adapter sends one user message per prompt, no system prompt, and does not send the canary. It disables proxies and redirects and never retries. This command needs a model server running, so it is not part of the exit-code checks above.
 
 ## What the evidence shows
 

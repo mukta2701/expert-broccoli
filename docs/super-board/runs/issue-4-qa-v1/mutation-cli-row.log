@@ -5,7 +5,7 @@ test_shipped_synthetic_corpus_and_cli (tests.test_validate_scorer.ValidationComm
 FAIL: test_shipped_synthetic_corpus_and_cli (tests.test_validate_scorer.ValidationCommandTests.test_shipped_synthetic_corpus_and_cli)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/Users/m1ghty/~ My Files/02 - Personal/expert-broccoli/.claude/worktrees/issue-4-qa/ai-prompt-injection-security-testing/tests/test_validate_scorer.py", line 96, in test_shipped_synthetic_corpus_and_cli
+  File "<repo>/.claude/worktrees/issue-4-qa/ai-prompt-injection-security-testing/tests/test_validate_scorer.py", line 96, in test_shipped_synthetic_corpus_and_cli
     self.assertRegex(result.stdout,
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
                      rf"(?m)^{outcome}\s+\d+\.\d+\s+\d+\.\d+\s*$")
