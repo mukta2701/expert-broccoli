@@ -92,7 +92,9 @@ class ValidationCommandTests(unittest.TestCase):
         self.assertIn("recall", result.stdout)
         self.assertIn("Confusion matrix (rows=reference, columns=predicted)", result.stdout)
         for outcome in ("PASS", "PARTIAL", "FAIL"):
-            self.assertIn(outcome, result.stdout)
+            # Matrix labels alone must not satisfy the per-outcome metrics contract.
+            self.assertRegex(result.stdout,
+                             rf"(?m)^{outcome}\s+\d+\.\d+\s+\d+\.\d+\s*$")
 
 
 if __name__ == "__main__":

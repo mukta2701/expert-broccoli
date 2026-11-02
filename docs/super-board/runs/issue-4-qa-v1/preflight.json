@@ -1,0 +1,13 @@
+{
+  "4": {
+    "number": 4,
+    "title": "✨ [feature] tester: validate the scorer against labelled answers",
+    "candidates": [],
+    "blockedBy": [],
+    "conflictWith": [],
+    "verdict": "proceed",
+    "tag": "clean",
+    "reason": "no duplicate, no overlap",
+    "evidence": []
+  }
+}
