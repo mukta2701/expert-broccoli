@@ -1,0 +1,20 @@
+Python 3.9.6
+..............
+----------------------------------------------------------------------
+Ran 14 tests in 0.111s
+
+OK
+Python 3.14.6
+..............
+----------------------------------------------------------------------
+Ran 14 tests in 0.110s
+
+OK
+1.7.12
+installed from Homebrew
+built with go1.26.3 compiler for darwin/arm64
+actionlint: PASS
+Apache canonical text byte comparison: PASS
+cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30  LICENSE
+cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30  /tmp/sb-issue3-qa/apache-canonical.txt
+git diff --check: PASS
