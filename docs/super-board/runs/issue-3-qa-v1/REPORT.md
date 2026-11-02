@@ -48,3 +48,18 @@ Truth confidence: 98/100, above the configured 70 threshold. Exact licence bytes
 source lines, fresh local test output and hosted CI support the four ACs.
 The final handoff is conditional on green CI for the published evidence commit.
 Merge belongs to the Reviewer lane and its merge gate.
+
+## Codex QA refresh, 2 November 2026
+
+Verified saved merge `d42eb6d` by its full HEAD in git; the issue files and
+application tree match published `7ae7b39ecdb64d33a6b53330078d17df39c9a5df`.
+Current staging is `1659d50`; its only additional change fixes GitHub-read usage handling.
+Fresh checks: exact Apache bytes, actionlint, 14 tests with Python 3.14.6,
+and 14 tests using the exact configured command with Python 3.15.2 all pass.
+CI at published `7ae7b39` passed for pull_request run 41375060301 and push run
+41375055941. The handoff records CI for this refreshed evidence commit.
+AC2 policy review confirms private reporting, disabled-button fallback, synthetic
+examples, no live payloads and local-mock-only scope at SECURITY.md:5-27.
+Inline independent review: Standards 0, Spec 0; no prior reviewer findings.
+Truth confidence remains 98/100; test-gap ledger above still applies.
+Screenshots intentionally omitted: no UI or visual acceptance criteria.
