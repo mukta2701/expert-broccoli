@@ -1,10 +1,16 @@
 """Repeated trials and the Wilson interval."""
 
 import unittest
+from contextlib import redirect_stdout
+from io import StringIO
+from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 from tester.stats import wilson_interval
-from tester.targets import MockTarget
+from tester.targets import MockTarget, OpenAICompatTarget
+from tester import test_runner
 from tester.test_runner import run_tests
+from tests.test_targets import fake_api
 
 
 class WilsonIntervalTests(unittest.TestCase):
@@ -34,9 +40,19 @@ class TrialsRunTests(unittest.TestCase):
             self.assertEqual(trial["attack_successes"], 5 if result["outcome"] == "FAIL" else 0)
             self.assertEqual(len(trial["wilson_95"]), 2)
 
+    def test_partial_is_not_an_attack_success(self):
+        class Score:
+            outcome, rationale, control_effectiveness = "PARTIAL", "x", 0.5
+            risk_score = exposure_factor = exposure_adjusted_risk_score = 1
+        with patch.object(test_runner, "score_response", return_value=Score):
+            results = run_tests("safe", trials=2)["results"]
+        self.assertTrue(all(r["trials"]["attack_successes"] == 0 for r in results))
+        self.assertIn("PARTIAL not counted", test_runner.TRIALS_HELP)
+
     def test_manifest_records_target_model_temperature_trials(self):
         manifest = run_tests("safe", trials=3)["manifest"]
-        self.assertEqual(manifest["target_type"], "mock")
+        self.assertEqual(manifest["target"], "mock")
+        self.assertNotIn("target_type", manifest)
         self.assertIsNone(manifest["model"])
         self.assertIsNone(manifest["temperature"])
         self.assertEqual(manifest["trials"], 3)
@@ -48,6 +64,21 @@ class TrialsRunTests(unittest.TestCase):
             self.assertEqual(summary["fail_count"], fails)
             self.assertTrue(all("trials" not in r for r in summary["results"]))
             self.assertEqual(summary["results"], run_tests(mode, trials=1, target=MockTarget(mode))["results"])
+
+    def test_http_target_temperature_is_sent_and_recorded_only_when_set(self):
+        with TemporaryDirectory() as tmp, fake_api(reply_text="No.") as (url, requests):
+            cases = test_runner.DEFAULT_CASES_PATH
+            manifests = []
+            for temperature in (None, 0.7):
+                target = OpenAICompatTarget(url, "toy", requests_per_second=1000)
+                manifests.append(run_tests("safe", target=target, cases_path=cases,
+                                           temperature=temperature)["manifest"])
+        self.assertEqual(manifests[0]["temperature"], "server default")
+        self.assertEqual(manifests[1]["temperature"], 0.7)
+        self.assertEqual(manifests[1]["model"], "toy")
+        first, second = requests[:16], requests[16:]
+        self.assertTrue(all("temperature" not in body for _, _, body in first))
+        self.assertTrue(all(body["temperature"] == 0.7 for _, _, body in second))
 
     def test_invalid_trials_rejected(self):
         for bad in (0, -1, True, 1.5):
