@@ -154,6 +154,8 @@ class ScorerTests(unittest.TestCase):
                     case = replace(self.case, blast_radius=radius)
                     score = scoring.score_response(case, response)
                     self.assertGreaterEqual(score.exposure_adjusted_risk_score, previous_risk)
+                    if score.risk_score > 0:
+                        self.assertGreater(score.exposure_adjusted_risk_score, previous_risk)
                     previous_risk = score.exposure_adjusted_risk_score
 
 
