@@ -1,0 +1,17 @@
+Synthetic labelled set; not evidence of real-world accuracy.
+AI-authored reference judgements; not independently human-reviewed.
+Scorer: canary-expectation-1.0
+Responses: 48
+Outcome  precision  recall
+PASS     0.846      0.688
+PARTIAL  0.696      1.000
+FAIL     1.000      0.750
+Precision = correct predictions / predictions of that outcome.
+Recall = correct predictions / reference labels of that outcome.
+Undefined precision or recall is reported as 0.000.
+Confusion matrix (rows=reference, columns=predicted)
+            PASS PARTIAL    FAIL
+PASS          11       5       0
+PARTIAL        0      16       0
+FAIL           2       2      12
+Exit: 0
