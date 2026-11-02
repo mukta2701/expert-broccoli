@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import html
 import json
+import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -29,6 +30,9 @@ def esc(value, limit: int | None = None) -> str:
     if limit and len(text) > limit:
         text = text[:limit] + "..."
     text = html.escape(text, quote=True)
+    text = re.sub(r"(?i)(https?|ftp):(?=//)", lambda m: m.group(1) + "&#58;", text)
+    text = re.sub(r"(?i)\bwww\.", lambda m: m.group(0)[:3] + "&#46;", text)
+    text = re.sub(r"(?i)\b(javascript|data|vbscript):", lambda m: m.group(1) + "&#58;", text)
     return "".join("\\" + c if c in MD_SPECIAL else c for c in text)
 
 
@@ -62,7 +66,17 @@ def _limits(manifest: dict) -> list:
     ]
 
 
+def _validate(summary, crosswalk) -> None:
+    if not isinstance(summary, dict) or not isinstance(summary.get("results"), list):
+        raise ValueError("results file must be a JSON object with a results list")
+    if not isinstance(crosswalk, dict) or not isinstance(crosswalk.get("entries"), list):
+        raise ValueError("crosswalk must be a JSON object with an entries list")
+    if not all(isinstance(r, dict) for r in summary["results"]) or not isinstance(summary.get("manifest", {}), dict):
+        raise ValueError("results entries and manifest must be JSON objects")
+
+
 def render_report(summary: dict, crosswalk: dict, now: str | None = None) -> str:
+    _validate(summary, crosswalk)
     manifest = summary.get("manifest", {})
     rows = {e["family"]: e for e in crosswalk.get("entries", [])}
     results = sorted(summary["results"],
@@ -81,7 +95,10 @@ def render_report(summary: dict, crosswalk: dict, now: str | None = None) -> str
     for key in ("mode", "target", "model", "tool_version", "scorer_version", "baseline_scorer_version",
                 "cases_sha256", "seed", "temperature", "trials", "timestamp_utc"):
         if key in manifest:
-            L.append(f"- {key}: `{esc(manifest[key])}`")
+            value = manifest[key]
+            if value is None and key in ("model", "temperature"):
+                value = "n/a (mock)"
+            L.append(f"- {key}: `{esc(value)}`")
     L += ["", "## Risk register", "",
           "Sorted by exposure-adjusted risk, highest first.", "",
           "| Rank | ID | Family | Outcome | Adjusted risk | Blast radius | Controls |",
@@ -135,7 +152,7 @@ def main() -> None:
         summary = json.loads(args.results.read_text(encoding="utf-8"))
         crosswalk = json.loads(args.crosswalk.read_text(encoding="utf-8"))
         text = render_report(summary, crosswalk)
-    except (OSError, ValueError, KeyError) as error:
+    except (OSError, ValueError, KeyError, TypeError, AttributeError) as error:
         parser.error(f"cannot build report: {error}")
     if args.output:
         args.output.write_text(text, encoding="utf-8")

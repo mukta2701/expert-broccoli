@@ -110,6 +110,34 @@ class ReportTests(unittest.TestCase):
         self.assertNotIn("[click](", text)
         self.assertNotIn("\n# Heading", text)
 
+    def _cli(self, payload):
+        with TemporaryDirectory() as tmp:
+            path = Path(tmp) / "r.json"
+            path.write_text(json.dumps(payload), encoding="utf-8")
+            return subprocess.run([sys.executable, "-m", "tester.report", str(path)],
+                                  cwd=str(ROOT), capture_output=True, text=True)
+
+    def test_bad_shapes_exit_cleanly(self):
+        wrong = copy.deepcopy(self.runs["safe"])
+        wrong["results"] = "nope"
+        for payload in ([], wrong, {"results": [1]}):
+            p = self._cli(payload)
+            self.assertEqual(p.returncode, 2)
+            self.assertNotIn("Traceback", p.stderr)
+            self.assertIn("cannot build report", p.stderr)
+
+    def test_bare_urls_inert(self):
+        run = copy.deepcopy(self.runs["unsafe"])
+        run["results"][0]["response"] = "see http://a.example https://b.example www.c.example javascript:alert(1)"
+        text = render_report(run, self.crosswalk)
+        for bad in ("http://", "https://", "www.", "javascript:"):
+            self.assertNotIn(bad, text)
+
+    def test_mock_manifest_has_no_none(self):
+        text = render_report(self.runs["safe"], self.crosswalk)
+        self.assertNotIn("`None`", text)
+        self.assertIn("n/a \\(mock\\)", text)
+
 
 if __name__ == "__main__":
     unittest.main()
