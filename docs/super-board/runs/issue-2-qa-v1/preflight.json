@@ -1,0 +1,13 @@
+{
+  "2": {
+    "number": 2,
+    "title": "🐛 [bug] risk: exposure-adjusted score lowers risk instead of raising it",
+    "candidates": [],
+    "blockedBy": [],
+    "conflictWith": [],
+    "verdict": "proceed",
+    "tag": "clean",
+    "reason": "no duplicate, no overlap",
+    "evidence": []
+  }
+}

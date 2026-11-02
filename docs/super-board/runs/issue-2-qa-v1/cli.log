@@ -1,0 +1,25 @@
+python3 -B tester/test_runner.py --mode safe --seed 23 --output <temporary>/safe.json
+Run mode: safe
+Methodology: Likelihood x Impact x (1 - effectiveness) x (1 + reachable capabilities)
+Total tests: 16
+PASS: 16 | PARTIAL: 0 | FAIL: 0
+Average residual risk: 0.0
+Exposure-adjusted residual risk: 0.0
+Scorer disagreements: 0
+Overall risk posture: Low
+Results written to: <temporary>/safe.json
+Manifest written to: <temporary>/safe.manifest.json
+Verified JSON averages, counts, per-case floor, methodology and companion manifest.
+
+python3 -B tester/test_runner.py --mode unsafe --seed 23 --output <temporary>/unsafe.json
+Run mode: unsafe
+Methodology: Likelihood x Impact x (1 - effectiveness) x (1 + reachable capabilities)
+Total tests: 16
+PASS: 0 | PARTIAL: 0 | FAIL: 16
+Average residual risk: 17.69
+Exposure-adjusted residual risk: 38.75
+Scorer disagreements: 0
+Overall risk posture: High
+Results written to: <temporary>/unsafe.json
+Manifest written to: <temporary>/unsafe.manifest.json
+Verified JSON averages, counts, per-case floor, methodology and companion manifest.
