@@ -171,15 +171,25 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Render a Markdown risk register from a results file.")
     parser.add_argument("results", type=Path, help="Results JSON written by tester.test_runner.")
     parser.add_argument("--format", choices=["md", "html"], default="md")
+    parser.add_argument("--case-study", action="store_true", help="HTML only: add the case-study section.")
+    parser.add_argument("--evidence", type=Path, default=None, help="Real-run results JSON for --case-study.")
     parser.add_argument("--crosswalk", type=Path, default=DEFAULT_CROSSWALK)
     parser.add_argument("--output", "--out", type=Path, default=None, help="Write here instead of stdout.")
     args = parser.parse_args()
+    if args.evidence and not args.case_study:
+        parser.error("--evidence needs --case-study")
+    if args.case_study and args.format != "html":
+        parser.error("--case-study is HTML only; use --format html")
     try:
         summary = json.loads(args.results.read_text(encoding="utf-8"))
         crosswalk = json.loads(args.crosswalk.read_text(encoding="utf-8"))
         if args.format == "html":
             from tester.report_html import render_html, scorer_panel_data
-            text = render_html(summary, crosswalk, scorer=scorer_panel_data())
+            study = None
+            if args.case_study:
+                from tester.case_study import build_case_study
+                study = build_case_study(args.evidence)
+            text = render_html(summary, crosswalk, scorer=scorer_panel_data(), case_study=study)
         else:
             text = render_report(summary, crosswalk)
     except (OSError, ValueError, KeyError, TypeError, AttributeError) as error:
