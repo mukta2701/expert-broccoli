@@ -141,7 +141,22 @@ def _scorer_html(scorer) -> str:
             f'<thead><tr><th scope="col">Reference</th>{head}</tr></thead><tbody>{mat}</tbody></table></div>')
 
 
-def render_html(summary: dict, crosswalk: dict, now: str | None = None, scorer=None) -> str:
+def _case_study_html(study) -> str:
+    cards = []
+    for ex in study["examples"]:
+        (oo, orr), (no, nr) = ex["old"], ex["new"]
+        cards.append(
+            f'<article class="body"><h3>{h(ex["title"])} <span class="badge verified">{h(ex["label"])}</span></h3>'
+            f'<dl><dt>Case</dt><dd>{h(ex["case_id"])}: {h(ex["case_text"], RESPONSE_LIMIT)}</dd></dl>'
+            f'<h4>Reply text</h4><blockquote>{h(ex["reply"], RESPONSE_LIMIT)}</blockquote>'
+            f'<dl><dt>Old scorer</dt><dd>{_out(oo)} {h(orr, RESPONSE_LIMIT)}</dd>'
+            f'<dt>Canary scorer</dt><dd>{_out(no)} {h(nr, RESPONSE_LIMIT)}</dd></dl>'
+            f'<p><strong>What it means:</strong> {h(ex["meaning"], VALUE_LIMIT * 2)}</p></article>')
+    return (f'<section aria-labelledby="casestudy"><h2 id="casestudy">Case study: a refusal that still leaks</h2>'
+            f'<p>{h(study["note"], VALUE_LIMIT)}</p>{"".join(cards)}</section>')
+
+
+def render_html(summary: dict, crosswalk: dict, now: str | None = None, scorer=None, case_study=None) -> str:
     validate(summary, crosswalk)
     manifest = summary.get("manifest", {})
     rows = {e["family"]: e for e in crosswalk.get("entries", [])}
@@ -234,7 +249,7 @@ def render_html(summary: dict, crosswalk: dict, now: str | None = None, scorer=N
 <li><a href="#summary">Summary</a></li><li><a href="#register">Risk register</a></li>
 <li><a href="#findings">Findings</a></li><li><a href="#crosswalk">Crosswalk</a></li>
 <li><a href="#manifest">Run manifest</a></li><li><a href="#scorer">Scorer accuracy</a></li>
-<li><a href="#limits">Limits</a></li></ul></nav>
+{'<li><a href="#casestudy">Case study</a></li>' if case_study else ''}<li><a href="#limits">Limits</a></li></ul></nav>
 </header>
 <main id="main">
 <section aria-labelledby="summary"><h2 id="summary">Summary</h2>
@@ -255,6 +270,7 @@ def render_html(summary: dict, crosswalk: dict, now: str | None = None, scorer=N
 <tbody>{"".join(cwrows)}</tbody></table></section>
 <section aria-labelledby="manifest"><h2 id="manifest">Run manifest</h2><dl>{man}</dl></section>
 <section aria-labelledby="scorer"><h2 id="scorer">Scorer accuracy</h2>{_scorer_html(scorer)}</section>
+{_case_study_html(case_study) if case_study else ""}
 <section aria-labelledby="limits"><h2 id="limits">Limits</h2><div class="limits"><ul>{limits}</ul></div></section>
 </main>
 <footer><p>Generated offline by tester.report. No scripts, no network requests.</p></footer>
