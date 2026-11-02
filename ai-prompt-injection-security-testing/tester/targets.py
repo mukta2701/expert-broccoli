@@ -80,6 +80,8 @@ class OpenAICompatTarget:
 
     def send(self, prompt: str, *, canary: str | None = None) -> TargetResponse:
         body = {"model": self.model, "messages": [{"role": "user", "content": prompt}]}
+        if getattr(self, "temperature", None) is not None:
+            body["temperature"] = self.temperature
         request = Request(self.url, json.dumps(body).encode(), headers={
             "Content-Type": "application/json", "X-Assurance-Ledger-Test": "1"})
         time.sleep(max(0, self.next_request - time.monotonic()))
