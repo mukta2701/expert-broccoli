@@ -18,7 +18,7 @@ from tester.targets import MockTarget, OpenAICompatTarget
 
 
 @contextmanager
-def fake_api(*, delay=0, redirect=False, reply_text="Synthetic reply"):
+def fake_api(*, delay=0, redirect=False, redirect_status=302, reply_text="Synthetic reply"):
     requests = []
 
     class Handler(BaseHTTPRequestHandler):
@@ -27,7 +27,7 @@ def fake_api(*, delay=0, redirect=False, reply_text="Synthetic reply"):
                              json.loads(self.rfile.read(int(self.headers["Content-Length"])))))
             time.sleep(delay)
             if redirect:
-                self.send_response(302)
+                self.send_response(redirect_status)
                 self.send_header("Location", "/escaped")
                 self.end_headers()
                 return
@@ -66,6 +66,39 @@ class MockTargetTests(unittest.TestCase):
 
 
 class OpenAICompatTests(unittest.TestCase):
+    def test_localhost_is_pinned_without_dns_and_ipv6_loopback_is_allowed(self):
+        with patch("socket.getaddrinfo", side_effect=AssertionError("unexpected DNS")):
+            target = OpenAICompatTarget("http://LOCALHOST:1234/v1/", "toy")
+            self.assertEqual(target.url, "http://127.0.0.1:1234/v1/chat/completions")
+            ipv6 = OpenAICompatTarget("http://[::1]:1234/v1", "toy")
+            self.assertEqual(ipv6.url, "http://[::1]:1234/v1/chat/completions")
+
+    def test_nonlocal_address_variants_need_authorization_before_dns(self):
+        hosts = ("localhost.example.com", "127.0.0.1.example.com", "2130706433",
+                 "0x7f000001", "[::]", "[2001:db8::1]", "[::ffff:192.0.2.1]")
+        with patch("socket.getaddrinfo", side_effect=AssertionError("unexpected DNS")):
+            for host in hosts:
+                with self.subTest(host=host), self.assertRaisesRegex(ValueError, "authorization"):
+                    OpenAICompatTarget(f"http://{host}/v1", "toy")
+
+    def test_all_supported_redirect_codes_stop_after_one_marked_request(self):
+        for status in (301, 302, 303, 307, 308):
+            with self.subTest(status=status), fake_api(
+                    redirect=True, redirect_status=status) as (url, requests):
+                with self.assertRaises(HTTPError) as error:
+                    OpenAICompatTarget(url, "toy").send("Synthetic redirect check")
+                self.assertEqual(error.exception.code, status)
+                self.assertEqual(len(requests), 1)
+                self.assertEqual(requests[0][1]["X-Assurance-Ledger-Test"], "1")
+
+    def test_unicode_prompt_round_trips_without_sending_protected_canary(self):
+        prompt = "Synthetic café 🥦\n第二行"
+        with fake_api(reply_text="Synthetic réponse ✓") as (url, requests):
+            response = OpenAICompatTarget(url, "toy").send(prompt, canary="QA_SYNTHETIC_CANARY")
+        self.assertEqual(response.text, "Synthetic réponse ✓")
+        self.assertEqual(requests[0][2]["messages"][0]["content"], prompt)
+        self.assertNotIn("QA_SYNTHETIC_CANARY", json.dumps(requests[0][2]))
+
     def test_non_text_reply_is_rejected_at_the_adapter(self):
         with fake_api(reply_text=None) as (url, requests):
             with self.assertRaisesRegex(ValueError, "text"):

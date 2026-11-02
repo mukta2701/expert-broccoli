@@ -1,0 +1,17 @@
+Mutation: localhost pin removed
+Exit: 1
+Observed: ValueError: non-local targets require --i-have-authorization
+
+Mutation: authorization guard removed
+Exit: 1
+Observed: AssertionError: ValueError not raised
+
+Mutation: redirect handler removed
+Exit: 1
+Observed: json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+Mutation: protected canary added to request
+Exit: 1
+Observed: AssertionError: 'QA_SYNTHETIC_CANARY' unexpectedly found in '{"canary": "QA_SYNTHETIC_CANARY", "model": "toy", "messages": [{"role": "user", "content": "Synthetic caf\\u00e9 \\ud83e\\udd66\\n\\u7b2c\\u4e8c\\u884c"}]}'
+
+All four source mutations were restored before the 38-test green runs.
