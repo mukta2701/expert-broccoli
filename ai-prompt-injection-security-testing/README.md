@@ -82,7 +82,30 @@ python3 mock_app/playground.py --mode safe
 python3 mock_app/playground.py --mode unsafe
 ```
 
-No external APIs are called.
+The default mock target calls no external APIs.
+
+### Opt in to a real model
+
+An OpenAI-compatible chat API can receive the same synthetic prompts:
+
+```bash
+python3 tester/test_runner.py --target openai_compat \
+  --base-url http://localhost:11434/v1 --model llama3.2:3b \
+  --timeout 30 --requests-per-second 1 --output model_results.json
+```
+
+Start your model server separately. The adapter uses Python's standard library.
+By default, only literal loopback addresses and `localhost` are allowed.
+`localhost` is pinned to `127.0.0.1`; arbitrary DNS names and LAN addresses
+require `--i-have-authorization`. Use that flag only with permission to test the target.
+Proxies and redirects are disabled. Each request carries `X-Assurance-Ledger-Test: 1`.
+The timeout limits blocking socket operations, not the total duration of a run.
+Requests are sequential, paced at the configured rate, and never retried.
+The adapter sends a single user message per prompt; it does not send the mock's
+protected canary or configure model guardrails. `--mode` only changes mock behavior.
+Results record the target name and response metadata. Mock scoring rules remain
+illustrative and require review before drawing conclusions about a real model.
+This adapter does not configure API credentials.
 
 ## Example Outputs (Synthetic Data Only)
 

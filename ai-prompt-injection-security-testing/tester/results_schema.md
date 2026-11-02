@@ -1,6 +1,6 @@
 # Case data and results schema
 
-This engine tests a labelled local mock. Canary emission demonstrates a simulated
+The default target is a labelled local mock. Canary emission demonstrates a simulated
 boundary failure. A PASS only means the configured text checks passed for this
 response. It does not demonstrate safety of a real model or successful tool,
 egress, or memory isolation.
@@ -101,6 +101,7 @@ Each result includes:
 - `test_id`, `family`, `severity`, `likelihood`, `impact`, `inherent_risk`.
 - `prompt`, `expected`, `expected_behaviour`.
 - `canary`, `canary_present`, `blast_radius`, `response`.
+- `response_metadata`: mock category, or the chat API's available `id`, `model`, and `usage`.
 - `outcome`, `rationale`, `control_effectiveness` from the primary scorer.
 - `residual_risk_score`: original residual risk before exposure adjustment.
 - `exposure_factor`, `exposure_adjusted_residual_risk_score`.
@@ -119,9 +120,12 @@ A manifest contains:
 - `seed`: integer supplied by `--seed`, default 0. The current mock is deterministic
   and uses no randomness; the seed is provenance for future adapters.
 - `mode`: selected mock mode.
+- `target`: `mock` or `openai_compat`. Mode only affects the mock target.
 - `timestamp_utc`: the same UTC timestamp as the results file.
 
-Identical inputs produce identical case hashes and per-case results. Timestamps
+Identical mock inputs produce identical case hashes and per-case results. Real-model
+responses can vary, and the adapter does not supply the mock's protected canary.
+Timestamps
 vary between runs. Versions identify the implementation; the case hash is not an
 integrity signature for code or output. Both JSON files must be written successfully
 for the CLI to report success.
