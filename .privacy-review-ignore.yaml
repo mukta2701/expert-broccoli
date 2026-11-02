@@ -162,3 +162,10 @@ entries:
     ticket: https://github.com/mukta2701/expert-broccoli/issues/15
     created_on: '2026-11-02'
     expires_on: '2026-11-16'
+  - id: 489c160f7dd578b8
+    reason: Harmless synthetic case text stored in the committed run results; no personal data.
+    privacy_approver: mukta2701
+    security_approver: mukta2701
+    ticket: https://github.com/mukta2701/expert-broccoli/issues/17
+    created_on: '2026-11-02'
+    expires_on: '2026-11-16'
