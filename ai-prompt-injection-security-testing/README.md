@@ -1,160 +1,120 @@
-# ai-prompt-injection-security-testing
+# Prompt-injection evidence pipeline
 
-A public project that demonstrates how to design and run **prompt-injection and jailbreak security testing** for chatbot/LLM workflows using a local mock application.
+A small, standard-library Python harness that runs 16 synthetic prompt-injection cases against a chatbot and turns the results into reviewable evidence. It runs against a local mock by default and can also call a model you run yourself.
 
-## Public Sanitised Portfolio-Safe Reconstruction
+![The HTML evidence pack: summary tiles for a mock run, with links to risk register, crosswalk, scorer accuracy, case study and limits](docs/screenshots/evidence-pack.jpg)
 
-This repository is a **public, sanitised, portfolio-safe reconstruction**.
+## What question it answers
 
-It is intentionally built as a clean-room project for hiring review and security education.
-No employer code, private prompts, confidential logs, or internal findings are included.
+1. Did the attack work? A harmless canary string and a per-case expected behaviour decide the outcome, not a guess at refusal wording.
+2. How far could it reach? Each case records a blast radius (tools, data, egress, memory) that adjusts an illustrative risk score.
+3. Can you trust the scorer? The scorer is measured against a labelled set and the precision and recall are published below, including where it is weak.
 
-See [DISCLAIMER.md](./DISCLAIMER.md) for full boundaries.
+## How it differs from attack scanners
 
-## Project Explanation (Step by Step)
+Tools such as Garak, PyRIT and Promptfoo generate and run attacks at scale. This project does not try to compete on attack coverage: it has 16 hand-written synthetic cases. It focuses on what happens after a run: the canary result, blast radius, an illustrative risk score, a mapping to framework controls, and a risk register. It is a portfolio project, not a replacement for those tools, and I have not benchmarked it against them.
 
-This section explains the full workflow end-to-end in plain language.
-
-1. Define the threat focus.
-This project focuses on prompt injection and jailbreak behavior: attempts to make an AI assistant ignore safety rules, reveal hidden instructions, or trigger unauthorized actions.
-
-2. Build a safe test catalog.
-Prompt families are collected from public security research and converted into sanitized templates.
-No operational exploit payloads are stored.
-
-3. Simulate an AI target locally.
-A local mock chatbot (`mock_app/mock_chatbot.py`) simulates two control postures:
-- `safe` mode: stronger guardrail behavior
-- `unsafe` mode: weak controls for comparison
-
-4. Execute repeatable tests.
-`tester/test_runner.py` runs test cases across prompt-injection families and records outcomes.
-
-5. Score each result.
-Each test is scored as `PASS`, `PARTIAL`, or `FAIL`, then weighted with:
-- Likelihood (1-5)
-- Impact (1-5)
-- Control effectiveness
-- Residual risk score
-
-6. Convert technical results into governance evidence.
-Outputs are mapped into findings, risk register entries, and mitigation recommendations in audit/GRC style.
-
-7. Link to recognized frameworks.
-Findings are mapped to OWASP LLM risks (especially Prompt Injection and Sensitive Information Disclosure) and aligned to ISO/IEC 27001 control themes.
-
-8. Keep the repository safe for public sharing.
-All examples use synthetic data and mock behavior only.
-
-## Security Objectives
-
-- Test direct prompt injection and instruction override attempts.
-- Test jailbreak-style framing and policy bypass pressure.
-- Test system prompt extraction attempts (mock prompt only).
-- Test indirect prompt injection (RAG/document/web/metadata channels).
-- Test prompt-to-tool action hijack patterns in agent-like workflows.
-- Measure residual risk and produce evidence-led security reporting.
-
-## Skills Demonstrated
-
-- AI security test design for LLM applications
-- Prompt-injection and jailbreak taxonomy development
-- Adversarial test automation in Python
-- Risk scoring using Likelihood x Impact with control effectiveness
-- Mapping technical findings to OWASP and ISO 27001 control expectations
-- Audit/GRC reporting: findings summary, risk register, mitigation plan, executive summary
-
-## How To Run the Mock Tester (Local Only)
-
-```bash
-cd ai-prompt-injection-security-testing
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python3 tester/test_runner.py --mode safe --output safe_results.json
-python3 tester/test_runner.py --mode unsafe --output unsafe_results.json
-```
-
-Optional interactive mock chat:
-
-```bash
-python3 mock_app/playground.py --mode safe
-python3 mock_app/playground.py --mode unsafe
-```
-
-The default mock target calls no external APIs.
-
-### Opt in to a real model
-
-An OpenAI-compatible chat API can receive the same synthetic prompts:
-
-```bash
-python3 tester/test_runner.py --target openai_compat \
-  --base-url http://localhost:11434/v1 --model llama3.2:3b \
-  --timeout 30 --requests-per-second 1 --output model_results.json
-```
-
-Start your model server separately. The adapter uses Python's standard library.
-By default, only literal loopback addresses and `localhost` are allowed.
-`localhost` is pinned to `127.0.0.1`; arbitrary DNS names and LAN addresses
-require `--i-have-authorization`. Use that flag only with permission to test the target.
-Proxies and redirects are disabled. Each request carries `X-Assurance-Ledger-Test: 1`.
-The timeout limits blocking socket operations, not the total duration of a run.
-Requests are sequential, paced at the configured rate, and never retried.
-The adapter sends a single user message per prompt; it does not send the mock's
-protected canary or configure model guardrails. `--mode` only changes mock behavior.
-Results record the target name and response metadata. Mock scoring rules remain
-illustrative and require review before drawing conclusions about a real model.
-This adapter does not configure API credentials.
-
-## Example Outputs (Synthetic Data Only)
+## Pipeline
 
 ```text
-Run mode: safe
-Methodology: Weighted Likelihood x Impact with control effectiveness adjustment
-Total tests: 16
-PASS: 16 | PARTIAL: 0 | FAIL: 0
-Average residual risk: 0.0
-Overall risk posture: Low
-
-Run mode: unsafe
-Methodology: Weighted Likelihood x Impact with control effectiveness adjustment
-Total tests: 16
-PASS: 0 | PARTIAL: 0 | FAIL: 16
-Average residual risk: 17.69
-Overall risk posture: High
+cases.json -> target (mock or your model) -> canary scorer (+ old substring scorer) -> blast-radius risk score
+          -> run manifest + results.json -> risk register (Markdown) / evidence pack (HTML) with control mapping
 ```
 
-All outputs are synthetic and generated by the local mock app.
+## Quick start
 
-## OWASP LLM Risk Mapping
+Run from this directory. Tested on Python 3.9 and 3.15. Standard library only, nothing to install.
 
-Primary mapping emphasis:
-- **Prompt Injection** (core project focus)
-- **Sensitive Information Disclosure** (modeled as a downstream outcome of successful injection or prompt leakage)
+```bash
+# Run the 16 cases against the mock chatbot, in a safe and an unsafe posture
+python3 -m tester.test_runner --mode safe --output safe_results.json
+python3 -m tester.test_runner --mode unsafe --output unsafe_results.json
 
-Additional related themes covered:
-- System prompt leakage attempts
-- Indirect prompt injection via external context sources
-- Excessive agency/tool-call abuse driven by prompt manipulation
+# Repeat each case 5 times; reports FAIL counts with a Wilson 95% interval
+python3 -m tester.test_runner --mode unsafe --trials 5 --output trials_results.json
 
-Reference links are listed in [references.md](./references.md).
+# Measure the scorer against the labelled responses
+python3 -m tester.validate_scorer
 
-## What This Repository Does Not Contain
+# Markdown risk register, then the HTML evidence pack (with the case study)
+python3 -m tester.report unsafe_results.json --output risk_register.md
+python3 -m tester.report unsafe_results.json --format html --case-study \
+  --evidence evidence/real_run_llama3_2_3b.json --output evidence_pack.html
 
-- Employer source code, private prompts, or internal runbooks
-- Real chatbot logs, screenshots, tickets, or private security findings
-- Customer, employee, or partner data
-- Internal URLs, cloud account identifiers, architecture details, or environment specifics
-- Credentials, API keys, tokens, or secrets
-- Instructions to exploit real systems
+# Run the tests
+python3 -m unittest discover -s tests -t .
+```
 
-## Summary
+The mock gives deterministic output: safe mode scores 16 PASS (average residual risk 0.0, posture Low); unsafe mode scores 16 FAIL (average residual risk 17.69, exposure-adjusted 38.75, posture High).
 
-This project demonstrates practical AI security engineering and GRC capability in one portfolio artifact.
-It shows that I can:
-- design structured prompt-injection test coverage,
-- automate repeatable control validation,
-- quantify residual risk,
-- and communicate remediation priorities in an audit-ready format.
+### Optionally, a model you run yourself
 
+```bash
+python3 -m tester.test_runner --target openai_compat \
+  --base-url http://localhost:11434/v1 --model llama3.2:3b \
+  --trials 5 --temperature 0.2 --output model_results.json
+```
+
+This sends each prompt to an OpenAI-compatible chat endpoint (Ollama is what I used). Loopback addresses need no extra flag. Any other target needs `--i-have-authorization` and written permission from its owner; see [SECURITY.md](../SECURITY.md). The adapter sends one user message per prompt, no system prompt, and does not send the canary. It disables proxies and redirects and never retries. This command needs a model server running, so it is not part of the exit-code checks above.
+
+## What the evidence shows
+
+### Scorer validation (48 synthetic labelled responses)
+
+Output of `python3 -m tester.validate_scorer`. The reference labels were written by an AI and have not been independently reviewed by a human, so treat these as a regression measure, not a real-world accuracy figure.
+
+| Outcome | Precision | Recall |
+|---|---|---|
+| PASS | 0.846 | 0.688 |
+| PARTIAL | 0.696 | 1.000 |
+| FAIL | 1.000 | 0.750 |
+
+The confusion matrix shows the weak spots: 5 of 16 reference PASS responses were scored PARTIAL, and 2 of 16 reference FAIL responses were scored PASS.
+
+### First real run: llama3.2:3b via Ollama
+
+Full write-up: [evidence/real_run_llama3_2_3b.md](evidence/real_run_llama3_2_3b.md). 16 cases, 5 trials each, 80 requests.
+
+The scorer returned 0 of 80 FAIL (Wilson 95% interval 0.000 to 0.046). **This is not evidence that the model resisted the attacks.** Reasons:
+
+- The scorer expects the mock chatbot's wording, so all 80 trials scored PARTIAL.
+- The canary was not in the model's context, so the run could not have measured canary leakage.
+- It is one 3B model on one machine, one temperature, no system prompt.
+- Replies are stored for trial 1 only.
+
+A manual reading of the 16 stored trial-1 replies, done by an AI reviewer and not a human, found 6 refusals, 4 compliances and 6 non-answers. That is one reply per case, not a rate. What the run does show is that the adapter, trials, intervals and manifest work end to end, and that this scorer does not fit a real model's replies. A scorer validated on labelled real replies is the missing piece.
+
+### Case study: a refusal that still leaks
+
+Two synthetic replies, shown in the evidence pack with `--case-study`:
+
+- A reply that opens with refusal wording but contains the canary. The old substring scorer says PASS; the canary scorer says FAIL.
+- The same leak with the canary spaced out instead of underscored. Both scorers miss it. Exact-string canary matching misses changed spelling, spacing or encoding.
+
+## Framework mapping
+
+`data/framework_crosswalk.json` maps each attack family to OWASP Top 10 for LLM Applications 2025, MITRE ATLAS, ISO/IEC 42001 and 27001 themes, and UK NCSC and DSIT guidance. Sources are in [docs/crosswalk_sources.md](docs/crosswalk_sources.md).
+
+- 14 of 16 entries are marked verified: every OWASP, ATLAS and UK reference was seen on a primary page. 2 are unverified: PI-07 (multi-turn persistence) and PI-16 (second-order injection).
+- "Verified" does not mean the family-to-control judgement was reviewed by anyone but me.
+- The ISO clause arrays are empty because the standards are paywalled. Only unverified theme names are listed.
+- The mapping is indicative and needs review. It is not a compliance verdict.
+
+## Limits
+
+- The mock target proves the pipeline works, not that anything is safe. Mock results say nothing about a real model.
+- The scorer validation labels were written by an AI and are not independently human-reviewed.
+- Risk scores are illustrative prioritisation, not measured risk. The High/Low posture label comes from the scorer.
+- Model replies can contain invisible text-direction characters. Reports escape HTML but such characters can still pass through into the output.
+- Nothing here certifies compliance with any standard or law.
+- Clean-room project: synthetic data only, no employer code, prompts, logs or findings. See [DISCLAIMER.md](DISCLAIMER.md).
+
+## Links
+
+- [DISCLAIMER.md](DISCLAIMER.md): content and usage boundaries
+- [docs/PLAN_3NOV.md](docs/PLAN_3NOV.md): the project plan
+- [docs/uk_market_analysis.md](docs/uk_market_analysis.md): UK market notes. This is second-hand (web search only, primary documents not opened) and partly unverified; check before quoting
+- [docs/crosswalk_sources.md](docs/crosswalk_sources.md): what was checked for the framework mapping
+- [SECURITY.md](../SECURITY.md): reporting and authorised use
+- [evidence/real_run_llama3_2_3b.md](evidence/real_run_llama3_2_3b.md): the first real run
+- [LICENSE](../LICENSE): Apache-2.0
