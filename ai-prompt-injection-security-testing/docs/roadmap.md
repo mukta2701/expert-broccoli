@@ -6,11 +6,12 @@ Status: draft plan. Day 0 is the day work starts. Dates are relative on purpose.
 
 The prototype is a clean teaching artifact, not yet a tool.
 
-- 16 test cases in `tester/scoring_criteria.py`, one prompt each, no variants.
-- Target is a keyword-matching mock (`mock_app/mock_chatbot.py`). It cannot be attacked, only pattern-matched.
-- Scoring is substring matching on refusal phrases. It is not validated against human labels.
+- 16 test cases in `data/cases.json`, one prompt each, no variants.
+- Target is a deterministic, keyword-matching mock (`mock_app/mock_chatbot.py`). Its scripted responses exercise the pipeline, not a real model or deployed controls.
+- The primary scorer checks exact canary emission and case-specific expected phrases. A refusal-substring scorer remains as a baseline. Neither is validated against human-labelled model responses.
 - The "16/16 PASS vs 0/16 PASS" result is true by construction. It demonstrates the pipeline, not detection skill.
-- No real model adapter, no tests of its own, no packaging, no CI, no license file.
+- An offline stdlib unittest suite exists in `tests/test_engine.py` for case loading, scoring, risk calculations and run provenance. Run it with `python3 -m unittest discover -s tests -t .` from the project folder.
+- No real model adapter, scanner importers, packaging, CI or license file exist on this baseline.
 
 Rule for everything below: no claim of industry value until it is measured on a real target against an independent baseline.
 
@@ -18,11 +19,11 @@ Rule for everything below: no claim of industry value until it is measured on a 
 
 Garak, PyRIT and Promptfoo already cover attack generation. Do not compete there. The defensible gap in this repo is:
 
-- **Risk-scored, audit-ready output.** Likelihood x impact with control effectiveness, mapped to OWASP LLM Top 10 and ISO 27001 themes.
-- **Governance evidence.** Findings, risk register and mitigation plan generated from run results.
+- **Risk-scored evidence example for review.** Likelihood x impact with control effectiveness, mapped to OWASP LLM Top 10 and ISO 27001 themes.
+- **Governance evidence.** Findings, risk register and mitigation plan, planned to be generated from run results (the current reports are static examples).
 - **Family-based, sanitized catalog.** Templates with placeholders, not live strings.
 
-Working pitch: "Turn red-team scanner output into a defensible risk register." It can ingest Garak, PyRIT and Promptfoo results as well as run its own tests. Revisit this after the 30-day gate.
+Working pitch: "Turn red-team scanner output into a defensible risk register." Importing Garak, PyRIT and Promptfoo results is a future proposal; the current runner executes only the local mock cases. Revisit this after the 30-day gate.
 
 ## 3. Phased plan
 
@@ -31,9 +32,9 @@ Working pitch: "Turn red-team scanner output into a defensible risk register." I
 - Add `LICENSE`, `SECURITY.md` and `CONTRIBUTING.md`.
 - Package as `pyproject.toml` with a `pitest` style CLI. Keep the core dependency-free.
 - Add a target adapter interface with three adapters: mock, OpenAI-compatible HTTP, and local model via an OpenAI-compatible server.
-- Add a pytest suite for scoring and adapters. Add CI (lint, type check, tests) on every pull request.
-- Replace substring scoring with a pluggable scorer interface. Keep the string scorer as a baseline.
-- Convert test cases to YAML or JSON data files with version, family, OWASP tag and sanitized template.
+- Extend the existing stdlib unittest suite for real-model adapters and scorer validation. Add CI (lint, type check, tests) on every pull request.
+- Build a pluggable scorer interface around the current canary/expectation scorer. Keep the substring scorer as a baseline.
+- Extend the existing versioned JSON cases with OWASP tags and sanitized variants.
 - Gate: one command runs against a real model and emits JSON plus a Markdown report.
 
 ### Days 31-60: Depth and credibility
@@ -42,7 +43,7 @@ Working pitch: "Turn red-team scanner output into a defensible risk register." I
 - Add indirect-injection scenarios with a sandboxed fake RAG corpus and fake tools. Tools only write to a local log.
 - Add a human-labeled set of at least 300 responses. Measure scorer precision, recall and inter-rater agreement.
 - Add an LLM-judge scorer and compare it with the string scorer on the labeled set.
-- Build importers for Garak, PyRIT and Promptfoo result files, feeding the risk register.
+- Proposed future work: build importers for Garak, PyRIT and Promptfoo result files, feeding the risk register.
 - Run the benchmark study (section 5) and write down negative results too.
 - Gate: a reproducible results table from at least three real models and the three baseline tools.
 

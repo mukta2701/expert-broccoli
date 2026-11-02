@@ -1,8 +1,9 @@
 # Plan: showpiece ready for 3 November
 
 Owner goal: a finished, public-ready portfolio repo by 3 Nov that shows AI security skill to hiring managers who find it later. No live meeting or presentation is planned; the repo itself is the deliverable.
-Direction: **evidence for UK regulators and auditors**, not another attack scanner.
-Demo target: the labelled mock only. No paid API calls, no spend.
+Direction: **evidence examples for review by security and governance readers**. These examples do not establish regulatory compliance.
+Planned real-model target: a locally hosted model. No paid API calls, no spend. A local-model adapter and recorded model runs are still required; the current runner supports only the mock.
+The labelled mock is a deterministic pipeline fixture for regression checks, not evidence of real-model security.
 Working title: *Assurance Ledger* (rename freely).
 
 ## The one idea that makes it non-generic
@@ -20,7 +21,7 @@ Then map every result to the controls an auditor asks about, and print a risk re
 
 ## Honest limits (state these in the README)
 
-- The target is a mock. Results prove the pipeline, not that any real model is safe.
+- Current results come from the labelled mock fixture. They exercise the pipeline, not real-model safety. Planned real-model results must name the local model, configuration and run manifest, and be reported separately.
 - Framework mappings are indicative and need legal/compliance review. Testing does not certify compliance.
 - UK market facts in `uk_market_analysis.md` are second-hand; verify before quoting.
 - Clean-room: no employer code, prompts, logs or findings. Confirm your IP/approval position before publishing.
@@ -51,7 +52,9 @@ Then map every result to the controls an auditor asks about, and print a risk re
       "verified": false } ] }
 ```
 
-`family` strings must match the 16 existing families exactly (see `tester/scoring_criteria.py`).
+`family` strings must match the 16 existing families exactly (see `data/cases.json`).
+
+`verified: true` records that the cited primary source was seen. It does not mean the family-to-control mapping passed independent or compliance review.
 
 ## Schedule
 
@@ -64,10 +67,10 @@ If time runs short, cut in this order: D9 CI, D5 validation depth, HTML polish. 
 ## Reader walkthrough (optional 3-minute script, for the README or a screen recording)
 
 1. Problem in one sentence (NCSC: injection may never be fully fixed, so measure blast radius).
-2. Run `safe` vs `unsafe` on the mock. Point out this is a labelled mock.
+2. Show the planned local-model run with its model ID and configuration when available. Show `safe` vs `unsafe` mock runs separately as labelled fixtures. Until the adapter and model run exist, show only the fixture and state the gap.
 3. Open the HTML evidence pack: one finding, its canary proof, blast radius, control mapping, register entry.
 4. Show the scorer validation table and the stated limits.
-5. Roadmap: real model adapters, indirect/RAG scenarios, benchmark against Garak/PyRIT/Promptfoo.
+5. Roadmap: finish the local-model adapter and measured runs, then indirect/RAG scenarios and proposed comparisons with Garak/PyRIT/Promptfoo.
 
 ## Worker routing and spend
 

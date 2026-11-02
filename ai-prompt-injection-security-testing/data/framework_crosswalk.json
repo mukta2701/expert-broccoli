@@ -4,7 +4,7 @@
   "checked_on": "2026-11-01",
   "caveats": [
     "Mappings are indicative and need legal/compliance review. Testing does not certify compliance.",
-    "verified=true means every owasp_llm_2025, mitre_atlas and uk reference in the entry was seen on a primary page (genai.owasp.org, atlas.mitre.org, ncsc.gov.uk, gov.uk). It does not mean a standards body endorsed the mapping; the family-to-control judgement is the author's.",
+    "verified=true means every owasp_llm_2025, mitre_atlas and uk reference in the entry was seen on a primary page (genai.owasp.org, atlas.mitre.org, ncsc.gov.uk, gov.uk). It does not mean the family-to-control mapping passed independent or compliance review, or that a standards body endorsed it; the mapping judgement is the author's.",
     "iso_42001 and iso_27001 clause arrays are intentionally empty: the ISO standards are paywalled and no clause text was opened. The additive fields iso_themes_42001 / iso_themes_27001 hold unverified theme names only, with no clause numbers.",
     "OWASP and ATLAS entries reflect the live sites on 2026-11-01. OWASP has announced a 2026 list that was not checked; ATLAS IDs change over time."
   ],
