@@ -176,6 +176,10 @@ def main() -> None:
     parser.add_argument("--crosswalk", type=Path, default=DEFAULT_CROSSWALK)
     parser.add_argument("--output", "--out", type=Path, default=None, help="Write here instead of stdout.")
     args = parser.parse_args()
+    if args.evidence and not args.case_study:
+        parser.error("--evidence needs --case-study")
+    if args.case_study and args.format != "html":
+        parser.error("--case-study is HTML only; use --format html")
     try:
         summary = json.loads(args.results.read_text(encoding="utf-8"))
         crosswalk = json.loads(args.crosswalk.read_text(encoding="utf-8"))

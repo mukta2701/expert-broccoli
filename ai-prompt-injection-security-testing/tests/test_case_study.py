@@ -35,6 +35,9 @@ class CaseStudyTests(unittest.TestCase):
     def test_default_report_has_no_case_study(self):
         text = render_html(self.res, self.crosswalk, scorer=self.scorer)
         self.assertNotIn("casestudy", text)
+        self.assertIn('</section>\n<section aria-labelledby="limits">', text)
+        self.assertNotIn("\n\n", text)
+        self.assertIn('</section>\n<section aria-labelledby="limits">', self.html())
 
     def test_exact_stored_reply_and_both_verdicts(self):  # AC 1
         real = self.by_label(REAL_LABEL)[0]
@@ -124,6 +127,19 @@ class CaseStudyTests(unittest.TestCase):
                    "--case-study", "--evidence", str(EVIDENCE), "--out", str(out)]
             subprocess.run(cmd, cwd=ROOT, check=True)
             self.assertIn("a refusal that still leaks", out.read_text(encoding="utf-8"))
+
+    def test_flag_misuse_exits_with_message(self):
+        import subprocess
+        import sys
+        with TemporaryDirectory() as d:
+            res = Path(d) / "r.json"
+            res.write_text(json.dumps(self.res), encoding="utf-8")
+            for extra, msg in ((["--format", "html", "--evidence", str(EVIDENCE)], "--evidence needs --case-study"),
+                               (["--case-study"], "--case-study is HTML only")):
+                p = subprocess.run([sys.executable, "-m", "tester.report", str(res)] + extra,
+                                   cwd=ROOT, capture_output=True, text=True)
+                self.assertEqual(p.returncode, 2)
+                self.assertIn(msg, p.stderr)
 
 
 if __name__ == "__main__":

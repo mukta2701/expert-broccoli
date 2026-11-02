@@ -270,8 +270,7 @@ def render_html(summary: dict, crosswalk: dict, now: str | None = None, scorer=N
 <tbody>{"".join(cwrows)}</tbody></table></section>
 <section aria-labelledby="manifest"><h2 id="manifest">Run manifest</h2><dl>{man}</dl></section>
 <section aria-labelledby="scorer"><h2 id="scorer">Scorer accuracy</h2>{_scorer_html(scorer)}</section>
-{_case_study_html(case_study) if case_study else ""}
-<section aria-labelledby="limits"><h2 id="limits">Limits</h2><div class="limits"><ul>{limits}</ul></div></section>
+{_case_study_html(case_study) + chr(10) if case_study else ""}<section aria-labelledby="limits"><h2 id="limits">Limits</h2><div class="limits"><ul>{limits}</ul></div></section>
 </main>
 <footer><p>Generated offline by tester.report. No scripts, no network requests.</p></footer>
 </div>
