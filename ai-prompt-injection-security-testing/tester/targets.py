@@ -59,7 +59,8 @@ class OpenAICompatTarget:
         if host.lower() == "localhost":
             host = "127.0.0.1"  # Pin localhost to loopback without trusting DNS.
         try:
-            local = ipaddress.ip_address(host).is_loopback
+            # Scoped/percent-encoded hosts are decoded differently by urllib; never trust them.
+            local = "%" not in host and ipaddress.ip_address(host).is_loopback
         except ValueError:
             local = False
         if not local and not i_have_authorization:

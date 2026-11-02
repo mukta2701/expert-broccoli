@@ -81,6 +81,15 @@ class OpenAICompatTests(unittest.TestCase):
                 with self.subTest(host=host), self.assertRaisesRegex(ValueError, "authorization"):
                     OpenAICompatTarget(f"http://{host}/v1", "toy")
 
+    def test_scoped_and_percent_encoded_hosts_need_authorization_before_dns(self):
+        with patch("socket.getaddrinfo", side_effect=AssertionError("unexpected DNS")), \
+                patch("socket.create_connection", side_effect=AssertionError("unexpected connect")), \
+                patch("urllib.request.OpenerDirector.open",
+                      side_effect=AssertionError("unexpected request")):
+            for host in ("[::1%3a2]", "[::1%3a1234]"):
+                with self.subTest(host=host), self.assertRaisesRegex(ValueError, "authorization"):
+                    OpenAICompatTarget(f"http://{host}/v1", "toy")
+
     def test_all_supported_redirect_codes_stop_after_one_marked_request(self):
         for status in (301, 302, 303, 307, 308):
             with self.subTest(status=status), fake_api(
