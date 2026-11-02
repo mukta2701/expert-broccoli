@@ -15,6 +15,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from tester import __version__  # noqa: E402
+from tester.stats import wilson_interval  # noqa: E402
 from tester.targets import MockTarget, OpenAICompatTarget, Target  # noqa: E402
 from tester.scoring_criteria import (  # noqa: E402
     BASELINE_SCORER_VERSION,
@@ -36,11 +37,14 @@ def _risk_posture(counter: Counter, avg_residual_risk: float) -> str:
 
 
 def run_tests(mode: str, seed: int = 0, cases_path: str | Path = DEFAULT_CASES_PATH,
-              target: Target | None = None) -> dict:
+              target: Target | None = None, trials: int = 1,
+              temperature: float | None = None) -> dict:
     if mode not in {"safe", "unsafe"}:
         raise ValueError("mode must be 'safe' or 'unsafe'.")
     if type(seed) is not int:
         raise ValueError("seed must be an integer.")
+    if type(trials) is not int or trials < 1:
+        raise ValueError("trials must be a positive integer.")
     target = target if target is not None else MockTarget(mode)
     cases, cases_sha256 = load_case_data(cases_path)
     timestamp = datetime.now(timezone.utc).isoformat()
@@ -52,6 +56,10 @@ def run_tests(mode: str, seed: int = 0, cases_path: str | Path = DEFAULT_CASES_P
         "seed": seed,
         "mode": mode,
         "target": target.name,
+        "target_type": target.name,
+        "model": getattr(target, "model", None),
+        "temperature": temperature,
+        "trials": trials,
         "timestamp_utc": timestamp,
     }
     results = []
@@ -60,6 +68,10 @@ def run_tests(mode: str, seed: int = 0, cases_path: str | Path = DEFAULT_CASES_P
         response = target.send(case.prompt, canary=case.canary)
         score = score_response(case, response.text)
         baseline = score_response_baseline(case, response.text)
+        outcomes = [score.outcome]
+        for _ in range(trials - 1):
+            repeat = target.send(case.prompt, canary=case.canary)
+            outcomes.append(score_response(case, repeat.text).outcome)
 
         results.append(
             {
@@ -88,6 +100,16 @@ def run_tests(mode: str, seed: int = 0, cases_path: str | Path = DEFAULT_CASES_P
                 "scorer_disagreement": score.outcome != baseline.outcome,
             }
         )
+        if trials > 1:
+            successes = outcomes.count("FAIL")
+            low, high = wilson_interval(successes, trials)
+            results[-1]["trials"] = {
+                "n": trials,
+                "attack_successes": successes,
+                "attack_success_rate": round(successes / trials, 4),
+                "wilson_95": [round(low, 4), round(high, 4)],
+                "outcomes": outcomes,
+            }
 
     outcome_counter = Counter(item["outcome"] for item in results)
     avg_residual_risk = round(sum(item["residual_risk_score"] for item in results) / len(results), 2)
@@ -125,13 +147,14 @@ def main() -> None:
     parser.add_argument("--i-have-authorization", action="store_true", help="Allow non-loopback targets.")
     parser.add_argument("--timeout", type=float, default=30, help="Socket timeout in seconds.")
     parser.add_argument("--requests-per-second", type=float, default=1, help="Maximum sequential request rate.")
+    parser.add_argument("--trials", type=int, default=1, help="Run each case N times and report a Wilson 95%% interval.")
     args = parser.parse_args()
 
     try:
         target = (MockTarget(args.mode) if args.target == "mock" else OpenAICompatTarget(
             args.base_url, args.model, i_have_authorization=args.i_have_authorization,
             timeout=args.timeout, requests_per_second=args.requests_per_second))
-        summary = run_tests(mode=args.mode, seed=args.seed, cases_path=args.cases, target=target)
+        summary = run_tests(mode=args.mode, seed=args.seed, cases_path=args.cases, target=target, trials=args.trials)
     except (ValueError, OSError, HTTPException) as error:
         parser.error(str(error))
 
@@ -149,6 +172,11 @@ def main() -> None:
     print(f"Exposure-adjusted residual risk: {summary['average_exposure_adjusted_residual_risk']}")
     print(f"Scorer disagreements: {summary['scorer_disagreement_count']}")
     print(f"Overall risk posture: {summary['overall_risk_posture']}")
+    if args.trials > 1:
+        for item in summary["results"]:
+            t = item["trials"]
+            print(f"{item['test_id']}: {t['attack_successes']}/{t['n']} attack successes, "
+                  f"95% Wilson [{t['wilson_95'][0]}, {t['wilson_95'][1]}]")
     print(f"Results written to: {args.output}")
     print(f"Manifest written to: {manifest_path}")
 
