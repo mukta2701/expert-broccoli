@@ -1,6 +1,27 @@
 max_ttl_days: 14
 require_github_issue: true
 entries:
+  - id: 8f85bc7870518d22
+    reason: The request contains the synthetic case prompt, not a personal-data field; loopback is enforced unless the caller explicitly authorizes a remote target.
+    privacy_approver: Codex inline privacy review (automated)
+    security_approver: Codex inline security review (automated)
+    ticket: https://github.com/mukta2701/expert-broccoli/issues/15
+    created_on: '2026-11-02'
+    expires_on: '2026-11-16'
+  - id: d3de6a3ef2ab791d
+    reason: This existing assertion compares synthetic prompts captured by the loopback fake HTTP server; its prior fingerprint 14bb64ec870c322c moved with the added QA tests. It neither constructs a model request nor handles personal data.
+    privacy_approver: Codex inline privacy review (automated)
+    security_approver: Codex inline security review (automated)
+    ticket: https://github.com/mukta2701/expert-broccoli/issues/15
+    created_on: '2026-11-02'
+    expires_on: '2026-11-16'
+  - id: 6cc81921a44d07ae
+    reason: This assertion compares the fixed synthetic Unicode string from the QA test against a request captured by the loopback fake server; no personal data or external service is involved.
+    privacy_approver: Codex inline privacy review (automated)
+    security_approver: Codex inline security review (automated)
+    ticket: https://github.com/mukta2701/expert-broccoli/issues/15
+    created_on: '2026-11-02'
+    expires_on: '2026-11-16'
   - id: c65e74278d35c83b
     reason: Reviewed false positive; see issue #1 for the per-finding rationale.
     privacy_approver: mukta2701
@@ -111,5 +132,33 @@ entries:
     privacy_approver: mukta2701
     security_approver: mukta2701
     ticket: https://github.com/mukta2701/expert-broccoli/issues/1
+    created_on: '2026-11-02'
+    expires_on: '2026-11-16'
+  - id: bd1969b8daee9ee3
+    reason: Forwards synthetic case text to the local scripted mock; no personal data. Fingerprint moved when the file gained lines.
+    privacy_approver: mukta2701
+    security_approver: mukta2701
+    ticket: https://github.com/mukta2701/expert-broccoli/issues/15
+    created_on: '2026-11-02'
+    expires_on: '2026-11-16'
+  - id: 04f7a5d620cc6614
+    reason: Synthetic test text sent to a loopback or explicitly authorised target; no personal data. Fingerprint moved when the file gained lines.
+    privacy_approver: mukta2701
+    security_approver: mukta2701
+    ticket: https://github.com/mukta2701/expert-broccoli/issues/15
+    created_on: '2026-11-02'
+    expires_on: '2026-11-16'
+  - id: 7a9ecb5123a23b43
+    reason: Test assertion on synthetic text captured by the loopback fake server; no personal data. Fingerprint moved when the file gained lines.
+    privacy_approver: mukta2701
+    security_approver: mukta2701
+    ticket: https://github.com/mukta2701/expert-broccoli/issues/15
+    created_on: '2026-11-02'
+    expires_on: '2026-11-16'
+  - id: f754b14fee83cfdb
+    reason: Test assertion on synthetic case text captured by the loopback fake server; no personal data. Fingerprint moved when the file gained lines.
+    privacy_approver: mukta2701
+    security_approver: mukta2701
+    ticket: https://github.com/mukta2701/expert-broccoli/issues/15
     created_on: '2026-11-02'
     expires_on: '2026-11-16'

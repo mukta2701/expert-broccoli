@@ -1,0 +1,50 @@
+test_all_original_case_fields_survive_migration (tests.test_engine.CaseDataTests.test_all_original_case_fields_survive_migration) ... ok
+test_invalid_case_data_is_rejected_before_running (tests.test_engine.CaseDataTests.test_invalid_case_data_is_rejected_before_running) ... ok
+test_cli_writes_results_and_matching_manifest_from_any_directory (tests.test_engine.RunnerTests.test_cli_writes_results_and_matching_manifest_from_any_directory) ... ok
+test_invalid_mode_is_rejected (tests.test_engine.RunnerTests.test_invalid_mode_is_rejected) ... ok
+test_invalid_seed_is_rejected (tests.test_engine.RunnerTests.test_invalid_seed_is_rejected) ... ok
+test_manifest_hash_tracks_the_exact_custom_case_bytes (tests.test_engine.RunnerTests.test_manifest_hash_tracks_the_exact_custom_case_bytes) ... ok
+test_mock_modes_keep_all_pass_and_all_fail (tests.test_engine.RunnerTests.test_mock_modes_keep_all_pass_and_all_fail) ... ok
+test_runner_loads_custom_cases_and_reports_disagreement (tests.test_engine.RunnerTests.test_runner_loads_custom_cases_and_reports_disagreement) ... ok
+test_baseline_remains_independent_and_can_disagree (tests.test_engine.ScorerTests.test_baseline_remains_independent_and_can_disagree) ... ok
+test_canary_overrides_even_a_complete_refusal (tests.test_engine.ScorerTests.test_canary_overrides_even_a_complete_refusal) ... ok
+test_exposure_adjusts_residual_risk_with_a_response_only_floor (tests.test_engine.ScorerTests.test_exposure_adjusts_residual_risk_with_a_response_only_floor) ... ok
+test_exposure_never_lowers_residual_risk_for_any_case_or_outcome (tests.test_engine.ScorerTests.test_exposure_never_lowers_residual_risk_for_any_case_or_outcome) ... ok
+test_missing_or_incomplete_expectation_is_partial (tests.test_engine.ScorerTests.test_missing_or_incomplete_expectation_is_partial) ... ok
+test_more_reachable_capabilities_never_lower_risk (tests.test_engine.ScorerTests.test_more_reachable_capabilities_never_lower_risk) ... ok
+test_other_case_canary_is_not_evidence_for_this_case (tests.test_engine.ScorerTests.test_other_case_canary_is_not_evidence_for_this_case) ... ok
+test_pass_requires_the_case_expectation (tests.test_engine.ScorerTests.test_pass_requires_the_case_expectation) ... ok
+test_response_only_exposure_equals_plain_risk (tests.test_engine.ScorerTests.test_response_only_exposure_equals_plain_risk) ... ok
+test_every_valid_exposure_preserves_risk_for_both_scorers (tests.test_exposure_contract.ExposureContractTests.test_every_valid_exposure_preserves_risk_for_both_scorers) ... ok
+test_mock_returns_text_and_category_metadata (tests.test_targets.MockTargetTests.test_mock_returns_text_and_category_metadata) ... ok
+test_all_supported_redirect_codes_stop_after_one_marked_request (tests.test_targets.OpenAICompatTests.test_all_supported_redirect_codes_stop_after_one_marked_request) ... ok
+test_explicit_authorization_allows_remote_configuration (tests.test_targets.OpenAICompatTests.test_explicit_authorization_allows_remote_configuration) ... ok
+test_ignores_environment_proxy_and_does_not_follow_redirects (tests.test_targets.OpenAICompatTests.test_ignores_environment_proxy_and_does_not_follow_redirects) ... ok
+test_localhost_is_pinned_without_dns_and_ipv6_loopback_is_allowed (tests.test_targets.OpenAICompatTests.test_localhost_is_pinned_without_dns_and_ipv6_loopback_is_allowed) ... ok
+test_non_text_reply_is_rejected_at_the_adapter (tests.test_targets.OpenAICompatTests.test_non_text_reply_is_rejected_at_the_adapter) ... ok
+test_nonlocal_address_variants_need_authorization_before_dns (tests.test_targets.OpenAICompatTests.test_nonlocal_address_variants_need_authorization_before_dns) ... ok
+test_rate_limit_spaces_requests_and_rejects_invalid_limits (tests.test_targets.OpenAICompatTests.test_rate_limit_spaces_requests_and_rejects_invalid_limits) ... ok
+test_remote_or_malformed_urls_are_rejected_before_network_access (tests.test_targets.OpenAICompatTests.test_remote_or_malformed_urls_are_rejected_before_network_access) ... ok
+test_sends_prompt_and_returns_reply_with_metadata_and_header (tests.test_targets.OpenAICompatTests.test_sends_prompt_and_returns_reply_with_metadata_and_header) ... ok
+test_socket_timeout_stops_a_stalled_response (tests.test_targets.OpenAICompatTests.test_socket_timeout_stops_a_stalled_response) ... ok
+test_unicode_prompt_round_trips_without_sending_protected_canary (tests.test_targets.OpenAICompatTests.test_unicode_prompt_round_trips_without_sending_protected_canary) ... ok
+test_cli_scores_all_prompts_and_records_target_and_response_metadata (tests.test_targets.TargetCLITests.test_cli_scores_all_prompts_and_records_target_and_response_metadata) ... ok
+test_nonlocal_cli_rejects_before_sending_any_request (tests.test_targets.TargetCLITests.test_nonlocal_cli_rejects_before_sending_any_request) ... ok
+test_absent_outcomes_have_zero_metrics (tests.test_validate_scorer.MetricTests.test_absent_outcomes_have_zero_metrics) ... ok
+test_precision_recall_and_matrix_on_a_fixed_example (tests.test_validate_scorer.MetricTests.test_precision_recall_and_matrix_on_a_fixed_example) ... ok
+test_unknown_labels_are_rejected (tests.test_validate_scorer.MetricTests.test_unknown_labels_are_rejected) ... ok
+test_bad_reference_records_cannot_silently_inflate_metrics (tests.test_validate_scorer.ReferenceEvaluationTests.test_bad_reference_records_cannot_silently_inflate_metrics) ... ok
+test_reference_labels_are_compared_with_the_correct_case_scorer (tests.test_validate_scorer.ReferenceEvaluationTests.test_reference_labels_are_compared_with_the_correct_case_scorer) ... ok
+test_shipped_synthetic_corpus_and_cli (tests.test_validate_scorer.ValidationCommandTests.test_shipped_synthetic_corpus_and_cli) ... ok
+
+----------------------------------------------------------------------
+Ran 38 tests in 0.983s
+
+OK
+
+Python 3.14 verification:
+......................................
+----------------------------------------------------------------------
+Ran 38 tests in 0.713s
+
+OK

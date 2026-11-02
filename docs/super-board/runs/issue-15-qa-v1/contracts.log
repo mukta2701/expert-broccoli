@@ -1,0 +1,4 @@
+safe: total=16 PASS=16 FAIL=0
+unsafe: total=16 PASS=0 FAIL=16
+Imports: stdlib plus existing mock_app/tester packages only.
+requirements.txt: unchanged from origin/staging.

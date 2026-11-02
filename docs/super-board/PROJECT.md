@@ -12,5 +12,5 @@ Public, sanitised portfolio repo. One project: `ai-prompt-injection-security-tes
 ## Boundaries
 
 - NEVER add employer code, private prompts, confidential logs or internal findings. See `ai-prompt-injection-security-testing/DISCLAIMER.md`.
-- NEVER point the tester at a real or third-party system. It targets the local mock app only.
+- The mock is the default. Real-model tests use `openai_compat`; non-loopback addresses require explicit `--i-have-authorization` (issue #15).
 - NEVER add third-party dependencies without asking.
