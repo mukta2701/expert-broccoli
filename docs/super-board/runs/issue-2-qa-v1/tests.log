@@ -1,0 +1,23 @@
+test_all_original_case_fields_survive_migration (tests.test_engine.CaseDataTests.test_all_original_case_fields_survive_migration) ... ok
+test_invalid_case_data_is_rejected_before_running (tests.test_engine.CaseDataTests.test_invalid_case_data_is_rejected_before_running) ... ok
+test_cli_writes_results_and_matching_manifest_from_any_directory (tests.test_engine.RunnerTests.test_cli_writes_results_and_matching_manifest_from_any_directory) ... ok
+test_invalid_mode_is_rejected (tests.test_engine.RunnerTests.test_invalid_mode_is_rejected) ... ok
+test_invalid_seed_is_rejected (tests.test_engine.RunnerTests.test_invalid_seed_is_rejected) ... ok
+test_manifest_hash_tracks_the_exact_custom_case_bytes (tests.test_engine.RunnerTests.test_manifest_hash_tracks_the_exact_custom_case_bytes) ... ok
+test_mock_modes_keep_all_pass_and_all_fail (tests.test_engine.RunnerTests.test_mock_modes_keep_all_pass_and_all_fail) ... ok
+test_runner_loads_custom_cases_and_reports_disagreement (tests.test_engine.RunnerTests.test_runner_loads_custom_cases_and_reports_disagreement) ... ok
+test_baseline_remains_independent_and_can_disagree (tests.test_engine.ScorerTests.test_baseline_remains_independent_and_can_disagree) ... ok
+test_canary_overrides_even_a_complete_refusal (tests.test_engine.ScorerTests.test_canary_overrides_even_a_complete_refusal) ... ok
+test_exposure_adjusts_residual_risk_with_a_response_only_floor (tests.test_engine.ScorerTests.test_exposure_adjusts_residual_risk_with_a_response_only_floor) ... ok
+test_exposure_never_lowers_residual_risk_for_any_case_or_outcome (tests.test_engine.ScorerTests.test_exposure_never_lowers_residual_risk_for_any_case_or_outcome) ... ok
+test_missing_or_incomplete_expectation_is_partial (tests.test_engine.ScorerTests.test_missing_or_incomplete_expectation_is_partial) ... ok
+test_more_reachable_capabilities_never_lower_risk (tests.test_engine.ScorerTests.test_more_reachable_capabilities_never_lower_risk) ... ok
+test_other_case_canary_is_not_evidence_for_this_case (tests.test_engine.ScorerTests.test_other_case_canary_is_not_evidence_for_this_case) ... ok
+test_pass_requires_the_case_expectation (tests.test_engine.ScorerTests.test_pass_requires_the_case_expectation) ... ok
+test_response_only_exposure_equals_plain_risk (tests.test_engine.ScorerTests.test_response_only_exposure_equals_plain_risk) ... ok
+test_every_valid_exposure_preserves_risk_for_both_scorers (tests.test_exposure_contract.ExposureContractTests.test_every_valid_exposure_preserves_risk_for_both_scorers) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 0.107s
+
+OK

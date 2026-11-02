@@ -94,7 +94,7 @@ def run_tests(mode: str, seed: int = 0, cases_path: str | Path = DEFAULT_CASES_P
         "timestamp_utc": timestamp,
         "mode": mode,
         "manifest": manifest,
-        "methodology": "Likelihood x Impact x (1 - effectiveness) x (1 + reachable capabilities) / 5",
+        "methodology": "Likelihood x Impact x (1 - effectiveness) x (1 + reachable capabilities)",
         "total_tests": len(cases),
         "pass_count": outcome_counter.get("PASS", 0),
         "partial_count": outcome_counter.get("PARTIAL", 0),
