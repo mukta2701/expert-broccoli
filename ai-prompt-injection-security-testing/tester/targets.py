@@ -1,5 +1,7 @@
 """Prompt targets share one text-and-metadata response contract."""
 
+from __future__ import annotations
+
 import ipaddress
 import json
 import math

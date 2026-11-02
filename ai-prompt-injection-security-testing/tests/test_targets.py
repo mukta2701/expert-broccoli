@@ -2,6 +2,7 @@
 
 import json
 import os
+import socket
 import subprocess
 import sys
 import tempfile
@@ -126,7 +127,7 @@ class OpenAICompatTests(unittest.TestCase):
     def test_socket_timeout_stops_a_stalled_response(self):
         with fake_api(delay=0.15) as (url, requests):
             target = OpenAICompatTarget(url, "toy", timeout=0.02)
-            with self.assertRaises(TimeoutError):
+            with self.assertRaises(socket.timeout):
                 target.send("test")
         self.assertEqual(requests[0][1]["X-Assurance-Ledger-Test"], "1")
 
