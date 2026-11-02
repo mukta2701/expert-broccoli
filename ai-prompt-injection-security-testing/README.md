@@ -1,8 +1,8 @@
 # Prompt-injection evidence pipeline
 
-A small, standard-library Python harness that runs 16 synthetic prompt-injection cases against a chatbot and turns the results into reviewable evidence. It runs against a local mock by default and can also call a model you run yourself.
+A small, standard-library Python harness that runs 16 synthetic prompt-injection cases against a chatbot and turns the results into reviewable evidence. It runs against a local mock by default and can also call a model you run yourself. Not a safety verdict or certification; see Limits.
 
-![The HTML evidence pack: summary tiles for a mock run, with links to risk register, crosswalk, scorer accuracy, case study and limits](docs/screenshots/evidence-pack.jpg)
+![The HTML evidence pack: summary tiles for a mock run, with links to risk register, crosswalk, scorer accuracy, case study and limits](docs/screenshots/evidence-pack.png)
 
 ## What question it answers
 
@@ -12,7 +12,7 @@ A small, standard-library Python harness that runs 16 synthetic prompt-injection
 
 ## How it differs from attack scanners
 
-Tools such as Garak, PyRIT and Promptfoo generate and run attacks at scale. This project does not try to compete on attack coverage: it has 16 hand-written synthetic cases. It focuses on what happens after a run: the canary result, blast radius, an illustrative risk score, a mapping to framework controls, and a risk register. It is a portfolio project, not a replacement for those tools, and I have not benchmarked it against them.
+Tools such as Garak, PyRIT and Promptfoo generate and run attacks at scale. This project does not try to compete on attack coverage: it has 16 hand-written synthetic cases. It focuses on what happens after a run: the canary result, blast radius, an illustrative risk score, a mapping to framework controls, and a risk register. It is a portfolio project, not a replacement for those tools, and I have not benchmarked it against them. Audience: reviewers assessing method, not teams looking for attack coverage.
 
 ## Pipeline
 
@@ -23,7 +23,7 @@ cases.json -> target (mock or your model) -> canary scorer (+ old substring scor
 
 ## Quick start
 
-Run from this directory. Tested on Python 3.9 and 3.15. Standard library only, nothing to install.
+Run from this directory. Unit tests and the mock/report commands were run on Python 3.9.6 and 3.15.2; the Ollama command was run on 3.15 only. Standard library only, nothing to install.
 
 ```bash
 # Run the 16 cases against the mock chatbot, in a safe and an unsafe posture
@@ -105,7 +105,7 @@ Two synthetic replies, shown in the evidence pack with `--case-study`:
 - The mock target proves the pipeline works, not that anything is safe. Mock results say nothing about a real model.
 - The scorer validation labels were written by an AI and are not independently human-reviewed.
 - Risk scores are illustrative prioritisation, not measured risk. The High/Low posture label comes from the scorer.
-- Model replies can contain invisible text-direction characters. Reports escape HTML but such characters can still pass through into the output.
+- Invisible text-direction characters in model replies pass through into reports and can hide or reorder text for a human reader. They cannot execute anything. Reports escape HTML.
 - Nothing here certifies compliance with any standard or law.
 - Clean-room project: synthetic data only, no employer code, prompts, logs or findings. See [DISCLAIMER.md](DISCLAIMER.md).
 
