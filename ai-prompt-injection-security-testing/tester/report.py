@@ -1,6 +1,6 @@
-"""Render a results file as a Markdown risk register.
+"""Render a results file as a Markdown risk register or a single-file HTML evidence pack.
 
-Usage: python3 -m tester.report results.json --format md
+Usage: python3 -m tester.report results.json --format md|html
 """
 
 from __future__ import annotations
@@ -24,8 +24,8 @@ MD_SPECIAL = set("\\`*_[]()!|~#")
 RESPONSE_LIMIT = 300
 
 
-def esc(value, limit: int | None = None) -> str:
-    """Neutralise HTML and Markdown in untrusted text; keep it on one line."""
+def clean(value, limit: int | None = None) -> str:
+    """HTML-escape and defang untrusted text; keep it on one line. Safe for HTML and Markdown."""
     text = " ".join(str(value).split())
     if limit and len(text) > limit:
         text = text[:limit] + "..."
@@ -33,7 +33,34 @@ def esc(value, limit: int | None = None) -> str:
     text = re.sub(r"(?i)(https?|ftp):(?=//)", lambda m: m.group(1) + "&#58;", text)
     text = re.sub(r"(?i)\bwww\.", lambda m: m.group(0)[:3] + "&#46;", text)
     text = re.sub(r"(?i)\b(javascript|data|vbscript):", lambda m: m.group(1) + "&#58;", text)
-    return "".join("\\" + c if c in MD_SPECIAL else c for c in text)
+    return text
+
+
+def esc(value, limit: int | None = None) -> str:
+    """Neutralise HTML and Markdown in untrusted text; keep it on one line."""
+    return "".join("\\" + c if c in MD_SPECIAL else c for c in clean(value, limit))
+
+
+MANIFEST_KEYS = ("mode", "target", "model", "tool_version", "scorer_version", "baseline_scorer_version",
+                 "cases_sha256", "seed", "temperature", "trials", "timestamp_utc")
+
+
+def manifest_items(manifest: dict) -> list:
+    """(key, value) pairs shown in every format, in one order."""
+    items = []
+    for key in MANIFEST_KEYS:
+        if key in manifest:
+            value = manifest[key]
+            if value is None and key in ("model", "temperature"):
+                value = "n/a (mock)"
+            items.append((key, value))
+    return items
+
+
+def ordered_results(summary: dict) -> list:
+    """Highest exposure-adjusted risk first, ties by test id."""
+    return sorted(summary["results"],
+                  key=lambda r: (-r["exposure_adjusted_residual_risk_score"], r["test_id"]))
 
 
 def _join(items) -> str:
@@ -48,25 +75,29 @@ def _rate(item: dict) -> str | None:
     return f"{t['attack_successes']}/{t['n']} attack successes, Wilson 95% interval {low:.2f} to {high:.2f}"
 
 
-def _limits(manifest: dict) -> list:
+def limits_text(manifest: dict) -> list:
     if manifest.get("target") == "mock":
-        target = ("- In this run the target is a mock: a local scripted stand-in, not a real model. "
+        target = ("In this run the target is a mock: a local scripted stand-in, not a real model. "
                   "Outcomes show the test harness working, not how any real system behaves.")
     else:
-        target = ("- This is a real-model run against one small model. Results describe that model, "
+        target = ("This is a real-model run against one small model. Results describe that model, "
                   "that configuration and that moment only.")
     return [
         target,
-        "- Scores are an illustrative prioritisation score: likelihood x impact, reduced by control "
+        "Scores are an illustrative prioritisation score: likelihood x impact, reduced by control "
         "effectiveness and raised by reachable capabilities. They are not measured probabilities.",
-        "- Framework mappings are indicative. They are the author's judgement, not a compliance verdict, "
+        "Framework mappings are indicative. They are the author's judgement, not a compliance verdict, "
         "and ISO entries are theme names only, with no clause numbers.",
-        "- Sixteen synthetic cases cover a small slice of prompt-injection techniques. A pass does not "
+        "Sixteen synthetic cases cover a small slice of prompt-injection techniques. A pass does not "
         "show an absence of weaknesses.",
     ]
 
 
-def _validate(summary, crosswalk) -> None:
+def _limits(manifest: dict) -> list:
+    return ["- " + t for t in limits_text(manifest)]
+
+
+def validate(summary, crosswalk) -> None:
     if not isinstance(summary, dict) or not isinstance(summary.get("results"), list):
         raise ValueError("results file must be a JSON object with a results list")
     if not isinstance(crosswalk, dict) or not isinstance(crosswalk.get("entries"), list):
@@ -76,11 +107,10 @@ def _validate(summary, crosswalk) -> None:
 
 
 def render_report(summary: dict, crosswalk: dict, now: str | None = None) -> str:
-    _validate(summary, crosswalk)
+    validate(summary, crosswalk)
     manifest = summary.get("manifest", {})
     rows = {e["family"]: e for e in crosswalk.get("entries", [])}
-    results = sorted(summary["results"],
-                     key=lambda r: (-r["exposure_adjusted_residual_risk_score"], r["test_id"]))
+    results = ordered_results(summary)
     stamp = now or datetime.now(timezone.utc).isoformat()
     L = ["# Prompt-injection risk register", "",
          f"Report timestamp (varies): {stamp}", "",
@@ -92,13 +122,8 @@ def render_report(summary: dict, crosswalk: dict, now: str | None = None) -> str
          f"- Overall risk posture: {esc(summary['overall_risk_posture'])}",
          f"- Scorer disagreements: {summary['scorer_disagreement_count']}", "",
          "## Run manifest", ""]
-    for key in ("mode", "target", "model", "tool_version", "scorer_version", "baseline_scorer_version",
-                "cases_sha256", "seed", "temperature", "trials", "timestamp_utc"):
-        if key in manifest:
-            value = manifest[key]
-            if value is None and key in ("model", "temperature"):
-                value = "n/a (mock)"
-            L.append(f"- {key}: `{esc(value)}`")
+    for key, value in manifest_items(manifest):
+        L.append(f"- {key}: `{esc(value)}`")
     L += ["", "## Risk register", "",
           "Sorted by exposure-adjusted risk, highest first.", "",
           "| Rank | ID | Family | Outcome | Adjusted risk | Blast radius | Controls |",
@@ -144,14 +169,18 @@ def render_report(summary: dict, crosswalk: dict, now: str | None = None) -> str
 def main() -> None:
     parser = argparse.ArgumentParser(description="Render a Markdown risk register from a results file.")
     parser.add_argument("results", type=Path, help="Results JSON written by tester.test_runner.")
-    parser.add_argument("--format", choices=["md"], default="md")
+    parser.add_argument("--format", choices=["md", "html"], default="md")
     parser.add_argument("--crosswalk", type=Path, default=DEFAULT_CROSSWALK)
-    parser.add_argument("--output", type=Path, default=None, help="Write here instead of stdout.")
+    parser.add_argument("--output", "--out", type=Path, default=None, help="Write here instead of stdout.")
     args = parser.parse_args()
     try:
         summary = json.loads(args.results.read_text(encoding="utf-8"))
         crosswalk = json.loads(args.crosswalk.read_text(encoding="utf-8"))
-        text = render_report(summary, crosswalk)
+        if args.format == "html":
+            from tester.report_html import render_html, scorer_panel_data
+            text = render_html(summary, crosswalk, scorer=scorer_panel_data())
+        else:
+            text = render_report(summary, crosswalk)
     except (OSError, ValueError, KeyError, TypeError, AttributeError) as error:
         parser.error(f"cannot build report: {error}")
     if args.output:
