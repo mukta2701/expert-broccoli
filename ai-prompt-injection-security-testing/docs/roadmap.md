@@ -20,7 +20,7 @@ Rule for everything below: no claim of industry value until it is measured on a 
 Garak, PyRIT and Promptfoo already cover attack generation. Do not compete there. The defensible gap in this repo is:
 
 - **Risk-scored evidence example for review.** Likelihood x impact with control effectiveness, mapped to OWASP LLM Top 10 and ISO 27001 themes.
-- **Governance evidence.** Findings, risk register and mitigation plan generated from run results.
+- **Governance evidence.** Findings, risk register and mitigation plan, planned to be generated from run results (the current reports are static examples).
 - **Family-based, sanitized catalog.** Templates with placeholders, not live strings.
 
 Working pitch: "Turn red-team scanner output into a defensible risk register." Importing Garak, PyRIT and Promptfoo results is a future proposal; the current runner executes only the local mock cases. Revisit this after the 30-day gate.
