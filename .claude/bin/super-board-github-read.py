@@ -41,6 +41,7 @@ FORMS = {
     'body': 'pr view <N> --json body,headRefOid',
     'metadata': 'pr view <N> --json files,labels,body,additions,deletions,changedFiles',
     'state': 'issue view <N> --json state --jq .state',
+    'diff': 'pr diff <N> (and pass --meta <file> saved from: pr view <N> --json files,labels,body,additions,deletions,changedFiles)',
 }
 
 
