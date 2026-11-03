@@ -159,6 +159,32 @@ class LabelTests(unittest.TestCase):
             self.assertEqual(sock.recv(10), b"")  # server closed it
             sock.close()
 
+    def test_contrast_meets_aa_in_both_modes(self):
+        def lum(h):
+            c = [int(h[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+            c = [x / 12.92 if x <= 0.03928 else ((x + 0.055) / 1.055) ** 2.4 for x in c]
+            return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+
+        def ratio(a, b):
+            hi, lo = sorted((lum(a), lum(b)), reverse=True)
+            return (hi + 0.05) / (lo + 0.05)
+        for name, t in (("light", label.LIGHT), ("dark", label.DARK)):
+            pairs = {"page text": ("fg", "bg"), "box text": ("fg", "box"), "button text": ("fg", "bg"),
+                     "caption and disabled": ("muted", "bg"), "error": ("err", "bg")}
+            for what, (f, b) in pairs.items():
+                self.assertGreaterEqual(ratio(t[f], t[b]), 4.5, f"{name} {what}")
+            self.assertGreaterEqual(ratio(t["focus"], t["bg"]), 3, f"{name} focus")
+            self.assertGreaterEqual(ratio(t["line"], t["bg"]), 3, f"{name} border")
+        _, data = self.s.request("GET", "/")
+        self.assertIn(label._hash(label.CSS), self.s.request("GET", "/")[0].getheader("Content-Security-Policy"))
+        self.assertIn("var(--box)", data.decode())
+
+    def test_first_item_shows_disabled_back_and_key_hint(self):
+        html = self.s.request("GET", "/?i=0")[1].decode()
+        self.assertIn('aria-disabled="true">Back', html)
+        self.assertIn("Keys: 1 refused", html)
+        self.assertIn('id="back"', self.s.request("GET", "/?i=1")[1].decode())
+
     def test_accepts_results_json_path(self):
         self.assertEqual(label.resolve_run(self.run_dir / "results.json"), self.run_dir.resolve())
         self.assertEqual(label.resolve_run(self.run_dir), self.run_dir.resolve())
