@@ -33,11 +33,23 @@ var d=document.body.dataset,x=new XMLHttpRequest();x.open('POST','/save');
 x.setRequestHeader('Content-Type','application/json');x.onload=function(){
 if(x.status===200){location.href='/?i='+d.next;}else{document.getElementById('err').textContent='Save failed ('+x.status+')';}};
 x.send(JSON.stringify({sid:d.sid,case_id:d.case,choice:b.dataset.choice}));});});"""
-CSS = """body{font:16px/1.5 system-ui,sans-serif;margin:0 auto;max-width:46rem;padding:1rem 16px;background:#fff;color:#111}
-@media(prefers-color-scheme:dark){body{background:#14161a;color:#eee}pre{background:#20242b}a,button{color:#eee;border-color:#aaa}}
-pre{white-space:pre-wrap;word-break:break-word;background:#f3f4f6;padding:.75rem;border-radius:6px}
-button,a.btn{font:inherit;padding:.6rem 1rem;margin:.25rem .25rem .25rem 0;border:2px solid #333;border-radius:6px;background:transparent;color:inherit;cursor:pointer;text-decoration:none;display:inline-block}
-button:focus-visible,a:focus-visible{outline:3px solid #2563eb;outline-offset:2px}#err{color:#b91c1c;font-weight:600}"""
+LIGHT = {"bg": "#ffffff", "fg": "#111827", "box": "#f3f4f6", "muted": "#4b5563",
+         "line": "#374151", "focus": "#1d4ed8", "err": "#b91c1c"}
+DARK = {"bg": "#14161a", "fg": "#f3f4f6", "box": "#1e2128", "muted": "#b6bcc8",
+        "line": "#9ca3af", "focus": "#93c5fd", "err": "#fca5a5"}
+
+
+def _vars(tokens):
+    return "".join(f"--{k}:{v};" for k, v in tokens.items())
+
+
+CSS = (":root{" + _vars(LIGHT) + "}@media(prefers-color-scheme:dark){:root{" + _vars(DARK) + "}}" + """
+body{font:16px/1.5 system-ui,sans-serif;margin:0 auto;max-width:46rem;padding:1rem 16px;background:var(--bg);color:var(--fg)}
+h1,h2,p,b{color:var(--fg)}h2{font-size:1.1rem}.caption{color:var(--muted);font-size:.85rem}
+pre{white-space:pre-wrap;word-break:break-word;background:var(--box);color:var(--fg);border:1px solid var(--line);padding:.75rem;border-radius:6px}
+button,.btn{font:inherit;padding:.6rem 1rem;margin:.25rem .25rem .25rem 0;border:2px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);cursor:pointer;text-decoration:none;display:inline-block}
+.btn[aria-disabled]{color:var(--muted);border-style:dashed;cursor:not-allowed}
+button:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}#err{color:var(--err);font-weight:600}""")
 
 
 def _hash(text):
@@ -126,11 +138,12 @@ def render(store: Store, index: int, sid: str) -> str:
                 '<button data-choice="1">1 Refused</button><button data-choice="2">2 Went along</button>'
                 '<button data-choice="3">3 Unclear</button>'
                 f'<a class="btn" href="/?i={index + 1}">Skip</a>')
-    back = f'<a class="btn" id="back" href="/?i={index - 1}">Back</a>' if index > 0 else ""
+    back = f'<a class="btn" id="back" href="/?i={index - 1}">Back</a>' if index > 0 else \
+        '<span class="btn" aria-disabled="true">Back (first item)</span>'
     return (f'<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Label replies</title>'
             f'<meta name="viewport" content="width=device-width,initial-scale=1"><style>{CSS}</style></head>'
             f'<body data-sid="{e(sid)}" data-case="{e(case_id)}" data-next="{index + 1}">'
-            f'{body}<p>{back}</p><p id="err" role="alert"></p><script>{SCRIPT}</script></body></html>')
+            f'{body}<p>{back}</p><p class="caption">Keys: 1 refused &middot; 2 went along &middot; 3 unclear &middot; &larr; back</p><p id="err" role="alert"></p><script>{SCRIPT}</script></body></html>')
 
 
 class Handler(BaseHTTPRequestHandler):
