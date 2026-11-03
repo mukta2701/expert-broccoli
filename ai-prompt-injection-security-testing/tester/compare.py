@@ -30,16 +30,24 @@ def h(value, limit=500):
 
 
 EXTRA_CSS = """
-.cmp{min-width:0}.cmp th.run{min-width:11rem}.cmp td{min-width:11rem}.cmp th.id{white-space:nowrap}
-.cmp details{margin:6px 0 0}.cmp summary{padding:4px 10px;font-weight:400;font-size:.85rem}
+.wrap{max-width:min(1800px,96vw)}
+.cmpwrap{overflow-x:auto}.hint{display:none;margin:4px 0}
+.cmp{table-layout:fixed;width:100%;min-width:56rem}
+.cmp th.id{width:150px;white-space:normal;position:sticky;left:0;background:var(--card);z-index:1}
+.cmp th.run{font-weight:400;white-space:normal}.cmp td{overflow-wrap:anywhere}
+.cmp .mname{display:block;font-weight:700}.cmp .msub{display:block;font-size:.78rem;color:var(--muted)}
+.cmp details{margin:6px 0 0}.cmp summary{padding:2px 8px;font-weight:400;font-size:.8rem;display:block}
 .cmp .gap{color:var(--muted);font-style:italic}.cmp tr.total td,.cmp tr.total th{border-top:2px solid var(--line);font-weight:700}
 .cmp .mix{display:block;color:var(--muted);font-size:.8rem}
+.cmp .badge{white-space:normal}.badge.neutral{background:var(--bg);color:var(--muted)}
+@media (max-width:960px){.hint{display:block}}
+@media (max-width:640px){.cmp th.id{width:6.5rem}}
 """
 CSS = BASE_CSS + EXTRA_CSS
 NOTE = ("Scores are illustrative. Results vary between runs; one small model per column is an anecdote, "
         "not a rate or a safety verdict. \"Leaked\" is used only for columns where a canary was planted in a "
         "system message (system variant weak or strong). Otherwise no secret was in the model's context, and "
-        "\"FAIL n of N (no secret planted)\" only counts replies the scorer judged as going along with the "
+        "\"no secret · FAIL n of N\" only counts replies the scorer judged as going along with the "
         "attack. PARTIAL/PASS only means no canary leak was seen.")
 
 
@@ -74,34 +82,45 @@ def load_run(path) -> dict:
     planted = m.get("system_variant") in SYSTEM_VARIANTS and m.get("system_variant") != "none"
     model = m.get("model") or f"mock ({m.get('mode', summary.get('mode', '?'))})"
     date = str(m.get("timestamp_utc") or "")[:10] or folder.name or "unknown date"
+    sub = (f"system {m.get('system_variant', 'n/a')} · temp {'n/a' if m.get('temperature') is None else m['temperature']}"
+           f" · {m.get('trials', 1)} trials · {date}{label_note}")
     label = (f"{model}, system {m.get('system_variant', 'n/a')}, temp {'n/a' if m.get('temperature') is None else m['temperature']}, "
              f"{m.get('trials', 1)} trial(s), {date}{label_note}")
-    return {"planted": planted, "label": label, "results": results, "order": [r["test_id"] for r in summary["results"]]}
+    return {"planted": planted, "label": label, "model": model, "sub": sub, "results": results, "order": [r["test_id"] for r in summary["results"]]}
 
 
 def _word(leaks, n, planted) -> str:
-    return f"leaked {leaks} of {n}" if planted else f"FAIL {leaks} of {n} (no secret planted)"
+    return f"leaked {leaks} of {n}" if planted else f"no secret · FAIL {leaks} of {n}"
+
+
+def _badge(leaks, n, planted) -> str:
+    if not planted:
+        cls, glyph = "neutral", "&#8854; "
+    else:
+        cls, glyph = (("out-pass", "&#10003; ") if leaks == 0 else
+                      ("out-fail", "&#10007; ") if leaks == n else ("out-partial", "&#9680; "))
+    return f'<span class="badge {cls}">{glyph}{_word(leaks, n, planted)}</span>'
 
 
 def _cell(r, planted) -> str:
     t = r.get("trials")
     n, leaks = (t["n"], t["attack_successes"]) if t else (1, int(r["outcome"] == "FAIL"))
     mix = Counter(t["outcomes"] if t else [r["outcome"]])
-    cls, glyph = (("out-pass", "&#10003; ") if leaks == 0 else
-                  ("out-fail", "&#10007; ") if leaks == n else ("out-partial", "&#9680; "))
     mix_text = " &middot; ".join(f"{k} {mix[k]}" for k in ("FAIL", "PARTIAL", "PASS") if mix[k])
     shown = f"reply shown is trial 1 of {n}" if n > 1 else "stored reply"
-    return (f'<td><span class="badge {cls}">{glyph}{_word(leaks, n, planted)}</span>'
+    return (f'<td>{_badge(leaks, n, planted)}'
             f'<span class="mix">{mix_text}</span><details><summary>Reply</summary><div class="body">'
             f'<p class="muted">{shown}</p><blockquote>{h(r["response"], RESPONSE_LIMIT)}</blockquote>'
             f'</div></details></td>'), leaks, n
 
 
 def render_compare(runs: list, now: str | None = None) -> str:
-    seen, labels = Counter(), []
+    seen, heads = Counter(), []
     for run in runs:
         seen[run["label"]] += 1
-        labels.append(run["label"] if seen[run["label"]] == 1 else f"{run['label']} #{seen[run['label']]}")
+        dup = "" if seen[run["label"]] == 1 else f" #{seen[run['label']]}"
+        heads.append(f'<th scope="col" class="run"><span class="mname">{h(run["model"] + dup)}</span>'
+                     f'<span class="msub">{h(run["sub"])}</span></th>')
     ids, family = [], {}
     for run in runs:
         for tid in run["order"]:
@@ -123,8 +142,8 @@ def render_compare(runs: list, now: str | None = None) -> str:
             cells.append(cell)
         body.append(f'<tr class="case"><th scope="row" class="id">{h(tid)}<span class="mix">{h(family[tid])}</span></th>'
                     + "".join(cells) + "</tr>")
-    head = "".join(f'<th scope="col" class="run">{h(lab)}</th>' for lab in labels)
-    foot = "".join(f"<td>{_word(a, b, run['planted'])}</td>" for (a, b), run in zip(totals, runs))
+    head = "".join(heads)
+    foot = "".join(f"<td>{_badge(a, b, run['planted'])}</td>" for (a, b), run in zip(totals, runs))
     digest = base64.b64encode(hashlib.sha256(CSS.encode("utf-8")).digest()).decode()
     csp = f"default-src 'none'; style-src 'sha256-{digest}'; base-uri 'none'; form-action 'none'"
     stamp = now or datetime.now(timezone.utc).isoformat()
@@ -147,7 +166,9 @@ def render_compare(runs: list, now: str | None = None) -> str:
 <p class="muted">Report timestamp (varies): {h(stamp)}</p>
 </header>
 <main>
-<div class="scroll"><table class="cmp"><caption class="muted">Leaks per attack and run (illustrative)</caption>
+<p class="muted">Leaks per attack and run (illustrative)</p>
+<p class="hint muted">&#8596; scroll sideways to see more runs</p>
+<div class="cmpwrap"><table class="cmp" aria-label="Leaks per attack and run, illustrative">
 <thead><tr><th scope="col">Attack</th>{head}</tr></thead>
 <tbody>{"".join(body)}
 <tr class="total"><th scope="row">Total</th>{foot}</tr></tbody></table></div>

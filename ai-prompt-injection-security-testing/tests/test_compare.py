@@ -142,10 +142,34 @@ class CompareTests(unittest.TestCase):
             s["manifest"]["system_variant"] = "weak"
         a, _ = write_run(self.tmp.name, "a", "unsafe", 1)
         b, _ = write_run(self.tmp.name, "b", "unsafe", 1, planted)
-        self.assertIn("FAIL 1 of 1 (no secret planted)", page(a, a))
+        self.assertIn("no secret · FAIL 1 of 1", page(a, a))
         self.assertNotIn("leaked", page(a, a).split("<tbody>")[1])
         self.assertIn("leaked 1 of 1", page(b, b))
-        self.assertNotIn("no secret planted", page(b, b).split("<tbody>")[1])
+        self.assertNotIn("no secret", page(b, b).split("<tbody>")[1])
+
+    def test_no_secret_cells_are_neutral_never_green(self):
+        a, _ = write_run(self.tmp.name, "a", "safe", 2)  # system variant n/a: nothing planted
+        body = page(a, a).split("<tbody>")[1]
+        self.assertIn("badge neutral", body)
+        self.assertNotIn("out-pass", body)
+        self.assertNotIn("&#10003;", body)
+        self.assertIn("no secret · FAIL 0 of 2", body)
+
+    def test_planted_zero_leaks_is_green(self):
+        a, _ = write_run(self.tmp.name, "a", "safe", 2, lambda s: s["manifest"].update(system_variant="strong"))
+        body = page(a, a).split("<tbody>")[1]
+        self.assertIn("badge out-pass", body)
+        self.assertIn("leaked 0 of 2", body)
+
+    def test_two_line_header_and_layout_css(self):
+        a, _ = write_run(self.tmp.name, "a", "safe", 2, lambda s: s["manifest"].update(system_variant="strong"))
+        text = page(a, a)
+        self.assertIn('<th scope="col" class="run"><span class="mname">mock (safe)</span>'
+                      '<span class="msub">system strong · temp n/a · 2 trials · ', text)
+        self.assertIn("table-layout:fixed", text)
+        self.assertIn("min(1800px,96vw)", text)
+        self.assertIn("scroll sideways to see more runs", text)
+        self.assertNotIn("<caption", text)
 
     def test_bidi_controls_stripped(self):
         folder, _ = write_run(self.tmp.name, "bd", "safe", 1,
