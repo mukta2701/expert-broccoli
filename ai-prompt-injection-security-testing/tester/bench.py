@@ -79,6 +79,8 @@ def main(argv=None, out=None, open_url=webbrowser.open, now=None) -> int:
 
     model = args.model or args.model_name
     target_name = args.target or ("openai_compat" if model else "mock")
+    if target_name == "mock" and args.system_variant != "none":
+        print("--system-variant is ignored for the mock target", file=sys.stderr)
     try:
         target = (MockTarget(args.mode) if target_name == "mock" else OpenAICompatTarget(
             args.base_url, model, i_have_authorization=args.i_have_authorization,

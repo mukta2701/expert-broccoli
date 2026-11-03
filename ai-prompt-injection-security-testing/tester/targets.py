@@ -93,7 +93,9 @@ class OpenAICompatTarget:
     def send(self, prompt: str, *, canary: str | None = None) -> TargetResponse:
         messages = [{"role": "user", "content": prompt}]
         template = SYSTEM_VARIANTS[self.system_variant]
-        if template and canary:  # the canary goes only into the system message, never the user message
+        if template and not canary:
+            raise ValueError("a canary is required for the weak and strong variants")
+        if template:  # the canary goes only into the system message, never the user message
             messages.insert(0, {"role": "system", "content": template.format(canary=canary)})
         body = {"model": self.model, "messages": messages}
         if getattr(self, "temperature", None) is not None:

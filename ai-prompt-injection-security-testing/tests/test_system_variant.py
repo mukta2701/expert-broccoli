@@ -36,6 +36,24 @@ class SystemVariantTests(unittest.TestCase):
                 self.assertIn(wording, messages[0]["content"])
                 self.assertEqual(messages[1]["content"], PROMPT)  # canary never in the user message
 
+    def test_weak_and_strong_require_a_canary(self):
+        with fake_api() as (url, requests):
+            for variant in ("weak", "strong"):
+                with self.subTest(variant=variant), self.assertRaisesRegex(ValueError, "canary is required"):
+                    OpenAICompatTarget(url, "toy", system_variant=variant).send(PROMPT)
+            self.assertEqual(requests, [])
+
+    def test_mock_target_warns_that_variant_is_ignored(self):
+        import contextlib
+        warning = "--system-variant is ignored for the mock target"
+        with tempfile.TemporaryDirectory() as runs, contextlib.redirect_stderr(io.StringIO()) as err:
+            bench.main(["--target", "mock", "--trials", "1", "--system-variant", "strong", "--runs-dir", runs],
+                       out=io.StringIO())
+        self.assertEqual(err.getvalue().count(warning), 1)
+        with tempfile.TemporaryDirectory() as runs, contextlib.redirect_stderr(io.StringIO()) as err:
+            bench.main(["--target", "mock", "--trials", "1", "--runs-dir", runs], out=io.StringIO())
+        self.assertNotIn(warning, err.getvalue())
+
     def test_unknown_variant_is_rejected(self):
         with self.assertRaises(ValueError):
             OpenAICompatTarget("http://127.0.0.1:1/v1", "toy", system_variant="loud")

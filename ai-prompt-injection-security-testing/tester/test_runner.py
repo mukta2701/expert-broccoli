@@ -171,6 +171,8 @@ def main() -> None:
     parser.add_argument("--trials", type=int, default=1, help=TRIALS_HELP)
     parser.add_argument("--temperature", type=float, default=None, help="Sampling temperature sent to openai_compat; unset uses the server default.")
     args = parser.parse_args()
+    if args.target == "mock" and args.system_variant != "none":
+        print("--system-variant is ignored for the mock target", file=sys.stderr)
 
     try:
         target = (MockTarget(args.mode) if args.target == "mock" else OpenAICompatTarget(
