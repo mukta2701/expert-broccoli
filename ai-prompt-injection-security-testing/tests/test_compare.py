@@ -32,13 +32,16 @@ def page(*folders, now="T0"):
 
 
 class CompareTests(unittest.TestCase):
+    counter = __import__("itertools").count()
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
 
     def test_rows_columns_and_leak_counts(self):
-        safe, s1 = write_run(self.tmp.name, "a", "safe", 2)
-        unsafe, s2 = write_run(self.tmp.name, "b", "unsafe", 1)
+        planted = lambda s: s["manifest"].update(system_variant="weak")
+        safe, s1 = write_run(self.tmp.name, "a", "safe", 2, planted)
+        unsafe, s2 = write_run(self.tmp.name, "b", "unsafe", 1, planted)
         html_text = page(safe, unsafe)
         n_cases = len(s1["results"])
         self.assertEqual(html_text.count('<tr class="case">'), n_cases)
@@ -111,6 +114,45 @@ class CompareTests(unittest.TestCase):
             compare.main([str(a / "results.json"), "--output", str(out)])
         self.assertIn("nothing is being compared", err.getvalue())
         self.assertTrue(out.exists())
+
+    def _bad(self, edit, needle):
+        folder, _ = write_run(self.tmp.name, f"x{next(self.counter)}", "safe", 2, edit)
+        with self.assertRaises(ValueError) as ctx:
+            compare.load_run(folder)
+        self.assertIn(needle, str(ctx.exception))
+
+    def test_bad_inputs_give_clear_messages(self):
+        self._bad(lambda s: s["results"][0]["trials"].pop("attack_successes"), "attack_successes")
+        self._bad(lambda s: s["results"][0]["trials"].pop("n"), "'n'")
+        self._bad(lambda s: s.update(results=[]), "no results")
+
+    def test_non_object_manifest_uses_fallback(self):
+        folder, _ = write_run(self.tmp.name, "m", "safe", 1, lambda s: s.update(manifest="oops"))
+        self.assertIn("manifest missing", compare.load_run(folder)["label"])
+
+    def test_unwritable_output_is_parser_error(self):
+        a, _ = write_run(self.tmp.name, "a", "safe", 1)
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err), self.assertRaises(SystemExit):
+            compare.main([str(a), str(a), "--output", str(Path(self.tmp.name) / "nodir" / "o.html")])
+        self.assertIn("cannot write", err.getvalue())
+
+    def test_wording_depends_on_planted_canary(self):
+        def planted(s):
+            s["manifest"]["system_variant"] = "weak"
+        a, _ = write_run(self.tmp.name, "a", "unsafe", 1)
+        b, _ = write_run(self.tmp.name, "b", "unsafe", 1, planted)
+        self.assertIn("FAIL 1 of 1 (no secret planted)", page(a, a))
+        self.assertNotIn("leaked", page(a, a).split("<tbody>")[1])
+        self.assertIn("leaked 1 of 1", page(b, b))
+        self.assertNotIn("no secret planted", page(b, b).split("<tbody>")[1])
+
+    def test_bidi_controls_stripped(self):
+        folder, _ = write_run(self.tmp.name, "bd", "safe", 1,
+                              lambda s: s["results"][0].update(response="ok \u202eevil\u2066 x"))
+        text = page(folder, folder)
+        for ch in "\u202a\u202e\u2066\u2069":
+            self.assertNotIn(ch, text)
 
 
 if __name__ == "__main__":

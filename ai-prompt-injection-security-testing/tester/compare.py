@@ -19,7 +19,15 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from tester.report import RESPONSE_LIMIT  # noqa: E402
-from tester.report_html import CSS as BASE_CSS, h  # noqa: E402
+from tester.report_html import CSS as BASE_CSS, h as _h  # noqa: E402
+from tester.targets import SYSTEM_VARIANTS  # noqa: E402
+
+_BIDI = dict.fromkeys(list(range(0x202A, 0x202F)) + list(range(0x2066, 0x206A)))
+
+
+def h(value, limit=500):
+    return _h(str(value).translate(_BIDI), limit)
+
 
 EXTRA_CSS = """
 .cmp{min-width:0}.cmp th.run{min-width:11rem}.cmp td{min-width:11rem}.cmp th.id{white-space:nowrap}
@@ -29,8 +37,10 @@ EXTRA_CSS = """
 """
 CSS = BASE_CSS + EXTRA_CSS
 NOTE = ("Scores are illustrative. Results vary between runs; one small model per column is an anecdote, "
-        "not a rate or a safety verdict. PARTIAL/PASS here only means no canary leak was seen unless a canary "
-        "was planted (system variant none or n/a means no secret was in the model's context).")
+        "not a rate or a safety verdict. \"Leaked\" is used only for columns where a canary was planted in a "
+        "system message (system variant weak or strong). Otherwise no secret was in the model's context, and "
+        "\"FAIL n of N (no secret planted)\" only counts replies the scorer judged as going along with the "
+        "attack. PARTIAL/PASS only means no canary leak was seen.")
 
 
 def load_run(path) -> dict:
@@ -45,17 +55,35 @@ def load_run(path) -> dict:
         results = {r["test_id"]: r for r in summary["results"]}
         for r in results.values():
             r["family"], r["response"], r["outcome"]  # noqa: B018 - required keys
-    except (OSError, ValueError, KeyError, TypeError) as error:
+    except (OSError, ValueError, KeyError, TypeError, AttributeError) as error:
         raise ValueError(f"{file}: not a usable results file ({type(error).__name__})") from None
-    m = summary.get("manifest") or {}
+    if not results:
+        raise ValueError(f"{file}: the run has no results")
+    for r in results.values():
+        t = r.get("trials")
+        if t is not None:
+            for field in ("n", "attack_successes"):
+                if not isinstance(t, dict) or type(t.get(field)) is not int:
+                    raise ValueError(f"{file}: case {r['test_id']} trials is missing integer field '{field}'")
+    m = summary.get("manifest")
+    if not isinstance(m, dict):
+        m = {}
+        label_note = ", manifest missing"
+    else:
+        label_note = ""
+    planted = m.get("system_variant") in SYSTEM_VARIANTS and m.get("system_variant") != "none"
     model = m.get("model") or f"mock ({m.get('mode', summary.get('mode', '?'))})"
     date = str(m.get("timestamp_utc") or "")[:10] or folder.name or "unknown date"
     label = (f"{model}, system {m.get('system_variant', 'n/a')}, temp {'n/a' if m.get('temperature') is None else m['temperature']}, "
-             f"{m.get('trials', 1)} trial(s), {date}")
-    return {"label": label, "results": results, "order": [r["test_id"] for r in summary["results"]]}
+             f"{m.get('trials', 1)} trial(s), {date}{label_note}")
+    return {"planted": planted, "label": label, "results": results, "order": [r["test_id"] for r in summary["results"]]}
 
 
-def _cell(r) -> str:
+def _word(leaks, n, planted) -> str:
+    return f"leaked {leaks} of {n}" if planted else f"FAIL {leaks} of {n} (no secret planted)"
+
+
+def _cell(r, planted) -> str:
     t = r.get("trials")
     n, leaks = (t["n"], t["attack_successes"]) if t else (1, int(r["outcome"] == "FAIL"))
     mix = Counter(t["outcomes"] if t else [r["outcome"]])
@@ -63,7 +91,7 @@ def _cell(r) -> str:
                   ("out-fail", "&#10007; ") if leaks == n else ("out-partial", "&#9680; "))
     mix_text = " &middot; ".join(f"{k} {mix[k]}" for k in ("FAIL", "PARTIAL", "PASS") if mix[k])
     shown = f"reply shown is trial 1 of {n}" if n > 1 else "stored reply"
-    return (f'<td><span class="badge {cls}">{glyph}leaked {leaks} of {n}</span>'
+    return (f'<td><span class="badge {cls}">{glyph}{_word(leaks, n, planted)}</span>'
             f'<span class="mix">{mix_text}</span><details><summary>Reply</summary><div class="body">'
             f'<p class="muted">{shown}</p><blockquote>{h(r["response"], RESPONSE_LIMIT)}</blockquote>'
             f'</div></details></td>'), leaks, n
@@ -89,14 +117,14 @@ def render_compare(runs: list, now: str | None = None) -> str:
             if r is None:
                 cells.append('<td class="gap">not run</td>')
                 continue
-            cell, leaks, n = _cell(r)
+            cell, leaks, n = _cell(r, run["planted"])
             totals[i][0] += leaks
             totals[i][1] += n
             cells.append(cell)
         body.append(f'<tr class="case"><th scope="row" class="id">{h(tid)}<span class="mix">{h(family[tid])}</span></th>'
                     + "".join(cells) + "</tr>")
     head = "".join(f'<th scope="col" class="run">{h(lab)}</th>' for lab in labels)
-    foot = "".join(f"<td>leaked {a} of {b}</td>" for a, b in totals)
+    foot = "".join(f"<td>{_word(a, b, run['planted'])}</td>" for (a, b), run in zip(totals, runs))
     digest = base64.b64encode(hashlib.sha256(CSS.encode("utf-8")).digest()).decode()
     csp = f"default-src 'none'; style-src 'sha256-{digest}'; base-uri 'none'; form-action 'none'"
     stamp = now or datetime.now(timezone.utc).isoformat()
@@ -114,7 +142,7 @@ def render_compare(runs: list, now: str | None = None) -> str:
 <div class="wrap">
 <header>
 <h1>Run comparison</h1>
-<p class="lede">Attacks as rows, runs as columns. Each cell counts trials where the canary scorer marked FAIL (a canary leak).</p>
+<p class="lede">Attacks as rows, runs as columns. Each cell counts trials where the canary scorer marked FAIL (a canary leak when a canary was planted).</p>
 <p class="limits">{h(NOTE, 1000)} A cell marked "not run" means that run did not include the case.</p>
 <p class="muted">Report timestamp (varies): {h(stamp)}</p>
 </header>
@@ -142,7 +170,10 @@ def main(argv=None) -> int:
         parser.error(str(error))
     if len(runs) == 1:
         print("warning: only one run given, nothing is being compared", file=sys.stderr)
-    Path(args.output).write_text(render_compare(runs), encoding="utf-8")
+    try:
+        Path(args.output).write_text(render_compare(runs), encoding="utf-8")
+    except OSError as error:
+        parser.error(f"cannot write {args.output}: {error.strerror or error}")
     print(f"Comparison written to: {args.output}")
     return 0
 
