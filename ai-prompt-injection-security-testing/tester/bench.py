@@ -17,7 +17,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from tester.report import DEFAULT_CROSSWALK, render_report  # noqa: E402
 from tester.report_html import render_html, scorer_panel_data  # noqa: E402
 from tester.scoring_criteria import DEFAULT_CASES_PATH  # noqa: E402
-from tester.targets import MockTarget, OpenAICompatTarget  # noqa: E402
+from tester.targets import SYSTEM_VARIANTS, MockTarget, OpenAICompatTarget  # noqa: E402
 from tester.test_runner import run_tests  # noqa: E402
 
 _ANSI = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]|\x1b[@-_]")
@@ -65,6 +65,8 @@ def main(argv=None, out=None, open_url=webbrowser.open, now=None) -> int:
     parser.add_argument("--target", choices=["mock", "openai_compat"], default=None)
     parser.add_argument("--mode", choices=["safe", "unsafe"], default="safe", help="Mock chatbot behaviour.")
     parser.add_argument("--base-url", default="http://localhost:11434/v1")
+    parser.add_argument("--system-variant", choices=list(SYSTEM_VARIANTS), default="none",
+                        help="openai_compat only: put the case canary in a system message (weak or strong).")
     parser.add_argument("--trials", type=int, default=5)
     parser.add_argument("--temperature", type=float, default=None)
     parser.add_argument("--timeout", type=float, default=180)
@@ -80,7 +82,8 @@ def main(argv=None, out=None, open_url=webbrowser.open, now=None) -> int:
     try:
         target = (MockTarget(args.mode) if target_name == "mock" else OpenAICompatTarget(
             args.base_url, model, i_have_authorization=args.i_have_authorization,
-            timeout=args.timeout, requests_per_second=args.requests_per_second))
+            timeout=args.timeout, requests_per_second=args.requests_per_second,
+            system_variant=args.system_variant))
         summary = run_tests(mode=args.mode, cases_path=args.cases, target=target, trials=args.trials,
                             temperature=args.temperature, progress=Progress(out))
         crosswalk = json.loads(Path(DEFAULT_CROSSWALK).read_text(encoding="utf-8"))
@@ -88,7 +91,10 @@ def main(argv=None, out=None, open_url=webbrowser.open, now=None) -> int:
         parser.error(f"run failed: {safe_text(error, 300)}")
 
     when = now or datetime.now()
-    run_dir = args.runs_dir / folder_name(when, f"mock-{args.mode}" if target_name == "mock" else model)
+    label = f"mock-{args.mode}" if target_name == "mock" else model
+    if target_name != "mock" and args.system_variant != "none":
+        label += f"_{args.system_variant}"
+    run_dir = args.runs_dir / folder_name(when, label)
     run_dir.mkdir(parents=True, exist_ok=True)
     (run_dir / "results.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     (run_dir / "results.manifest.json").write_text(json.dumps(summary["manifest"], indent=2) + "\n", encoding="utf-8")
