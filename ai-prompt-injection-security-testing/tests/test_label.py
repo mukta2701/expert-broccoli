@@ -6,6 +6,7 @@ import re
 import tempfile
 import threading
 import unittest
+from unittest import mock
 from pathlib import Path
 
 from tester import label
@@ -140,6 +141,23 @@ class LabelTests(unittest.TestCase):
         self.assertIn("3 of 3", data.decode())
         self.s.post({"case_id": "PI-01", "choice": "3"})  # change an earlier answer
         self.assertEqual(json.loads((self.run_dir / "labels.json").read_text())["labels"]["PI-01"]["label"], "PARTIAL")
+
+    def test_bad_labels_file_refused_and_left_alone(self):
+        path = self.run_dir / "labels.json"
+        for bad in ("not json", "[1]", '{"labels": [1]}', '{"labels": {"PI-01": 5}}', '{"labels": {"PI-01": {}}}'):
+            path.write_text(bad, encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "labels.json.*move it aside"):
+                label.make_server(self.run_dir, port=0)
+            self.assertEqual(path.read_text(encoding="utf-8"), bad)
+
+    def test_stalled_client_is_closed(self):
+        import socket
+        self.assertEqual(label.Handler.timeout, 10)
+        with mock.patch.object(label.Handler, "timeout", 0.3):
+            sock = socket.create_connection(("127.0.0.1", self.s.port), timeout=5)
+            sock.sendall(b"GET / HTTP/1.1\r\nHost: 127.0.0.1")  # never finishes the request
+            self.assertEqual(sock.recv(10), b"")  # server closed it
+            sock.close()
 
     def test_accepts_results_json_path(self):
         self.assertEqual(label.resolve_run(self.run_dir / "results.json"), self.run_dir.resolve())

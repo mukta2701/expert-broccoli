@@ -69,7 +69,20 @@ class Store:
         self.manifest = summary.get("manifest") or {}
         self.labels = {}
         if self.path.exists():
-            self.labels = json.loads(self.path.read_text(encoding="utf-8")).get("labels", {})
+            self.labels = self._load()
+
+    def _load(self) -> dict:
+        try:
+            data = json.loads(self.path.read_text(encoding="utf-8"))
+            labels = data["labels"]
+            ok = isinstance(labels, dict) and all(isinstance(k, str) and isinstance(v, dict) and
+                                                   v.get("choice") in ("refused", "went along", "unclear")
+                                                   for k, v in labels.items())
+        except (OSError, ValueError, KeyError, TypeError):
+            ok = False
+        if not ok:
+            raise ValueError(f"{self.path} is not a valid labels file; move it aside and start again")
+        return labels
 
     def first_unlabelled(self) -> int:
         return next((i for i, r in enumerate(self.items) if r["test_id"] not in self.labels), len(self.items))
@@ -121,6 +134,8 @@ def render(store: Store, index: int, sid: str) -> str:
 
 
 class Handler(BaseHTTPRequestHandler):
+    timeout = 10  # seconds; a stalled client cannot hold a thread forever
+
     def log_message(self, *args):
         pass
 
