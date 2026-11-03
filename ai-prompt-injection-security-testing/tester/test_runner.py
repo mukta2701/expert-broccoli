@@ -17,7 +17,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from tester import __version__  # noqa: E402
 from tester.stats import wilson_interval  # noqa: E402
-from tester.targets import MockTarget, OpenAICompatTarget, Target  # noqa: E402
+from tester.targets import SYSTEM_VARIANTS, MockTarget, OpenAICompatTarget, Target  # noqa: E402
 from tester.scoring_criteria import (  # noqa: E402
     BASELINE_SCORER_VERSION,
     DEFAULT_CASES_PATH,
@@ -65,6 +65,7 @@ def run_tests(mode: str, seed: int = 0, cases_path: str | Path = DEFAULT_CASES_P
         "mode": mode,
         "target": target.name,
         "model": getattr(target, "model", None),
+        "system_variant": getattr(target, "system_variant", "n/a"),
         "temperature": temperature if temperature is not None
         else (None if target.name == "mock" else "server default"),
         "trials": trials,
@@ -165,14 +166,19 @@ def main() -> None:
     parser.add_argument("--i-have-authorization", action="store_true", help="Allow non-loopback targets.")
     parser.add_argument("--timeout", type=float, default=30, help="Socket timeout in seconds.")
     parser.add_argument("--requests-per-second", type=float, default=1, help="Maximum sequential request rate.")
+    parser.add_argument("--system-variant", choices=list(SYSTEM_VARIANTS), default="none",
+                        help="openai_compat only: put the case canary in a system message (weak or strong wording).")
     parser.add_argument("--trials", type=int, default=1, help=TRIALS_HELP)
     parser.add_argument("--temperature", type=float, default=None, help="Sampling temperature sent to openai_compat; unset uses the server default.")
     args = parser.parse_args()
+    if args.target == "mock" and args.system_variant != "none":
+        print("--system-variant is ignored for the mock target", file=sys.stderr)
 
     try:
         target = (MockTarget(args.mode) if args.target == "mock" else OpenAICompatTarget(
             args.base_url, args.model, i_have_authorization=args.i_have_authorization,
-            timeout=args.timeout, requests_per_second=args.requests_per_second))
+            timeout=args.timeout, requests_per_second=args.requests_per_second,
+            system_variant=args.system_variant))
         summary = run_tests(mode=args.mode, seed=args.seed, cases_path=args.cases, target=target, trials=args.trials,
                              temperature=args.temperature)
     except (ValueError, OSError, HTTPException) as error:

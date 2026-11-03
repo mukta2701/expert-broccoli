@@ -169,3 +169,24 @@ entries:
     ticket: https://github.com/mukta2701/expert-broccoli/issues/17
     created_on: '2026-11-02'
     expires_on: '2026-11-16'
+  - id: 4617a45fa792affd
+    reason: Synthetic test text passed to a loopback or explicitly authorised target; no personal data.
+    privacy_approver: mukta2701
+    security_approver: mukta2701
+    ticket: https://github.com/mukta2701/tripwire/issues/41
+    created_on: '2026-11-03'
+    expires_on: '2026-11-16'
+  - id: e85c34cfcb76d51b
+    reason: Test assertion on synthetic text captured by the loopback fake server; no personal data.
+    privacy_approver: mukta2701
+    security_approver: mukta2701
+    ticket: https://github.com/mukta2701/tripwire/issues/41
+    created_on: '2026-11-03'
+    expires_on: '2026-11-16'
+  - id: e07b5b4fc829646c
+    reason: Test assertion on synthetic text captured by the loopback fake server; no personal data.
+    privacy_approver: mukta2701
+    security_approver: mukta2701
+    ticket: https://github.com/mukta2701/tripwire/issues/41
+    created_on: '2026-11-03'
+    expires_on: '2026-11-16'
