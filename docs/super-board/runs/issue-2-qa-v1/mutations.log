@@ -1,0 +1,32 @@
+Original division by five: exit 1
+F
+======================================================================
+FAIL: test_every_valid_exposure_preserves_risk_for_both_scorers (tests.test_exposure_contract.ExposureContractTests.test_every_valid_exposure_preserves_risk_for_both_scorers) (scorer='score_response', likelihood=1, impact=1, outcome='PASS', radius=['none'])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "ai-prompt-injection-security-testing/tests/test_exposure_contract.py", line 49, in test_every_valid_exposure_preserves_risk_for_both_scorers
+    self.assertEqual(score.exposure_factor, factor)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0.2 != 1.0
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+FAILED (failures=1)
+
+Capability increment removed: exit 1
+F
+======================================================================
+FAIL: test_every_valid_exposure_preserves_risk_for_both_scorers (tests.test_exposure_contract.ExposureContractTests.test_every_valid_exposure_preserves_risk_for_both_scorers) (scorer='score_response', likelihood=1, impact=1, outcome='PASS', radius=['tools'])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "ai-prompt-injection-security-testing/tests/test_exposure_contract.py", line 49, in test_every_valid_exposure_preserves_risk_for_both_scorers
+    self.assertEqual(score.exposure_factor, factor)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1.0 != 2.0
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+FAILED (failures=1)
+

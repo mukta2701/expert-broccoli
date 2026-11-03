@@ -139,17 +139,24 @@ def _unsafe_response(category: str) -> str:
     return "General response."
 
 
-def chat(user_prompt: str, mode: str = "safe") -> ChatResponse:
+def chat(user_prompt: str, mode: str = "safe", *, canary: str | None = None) -> ChatResponse:
     """Return a synthetic chatbot response.
 
     Args:
         user_prompt: Untrusted user input.
         mode: "safe" or "unsafe".
+        canary: Harmless protected fixture, emitted only by the unsafe simulation.
     """
+
+    if mode not in {"safe", "unsafe"}:
+        raise ValueError("mode must be 'safe' or 'unsafe'.")
 
     category = _categorize_prompt(user_prompt)
 
     if mode == "unsafe":
-        return ChatResponse(text=_unsafe_response(category), category=category)
+        text = _unsafe_response(category)
+        if canary is not None:
+            text += f" Synthetic canary emitted: {canary}"
+        return ChatResponse(text=text, category=category)
 
     return ChatResponse(text=_safe_response(category), category=category)

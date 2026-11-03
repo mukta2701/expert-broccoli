@@ -1,0 +1,564 @@
+{
+  "schema_version": 1,
+  "generated_for": "D7",
+  "checked_on": "2026-11-01",
+  "caveats": [
+    "Mappings are indicative and need legal/compliance review. Testing does not certify compliance.",
+    "verified=true means every owasp_llm_2025, mitre_atlas and uk reference in the entry was seen on a primary page (genai.owasp.org, atlas.mitre.org, ncsc.gov.uk, gov.uk). It does not mean the family-to-control mapping passed independent or compliance review, or that a standards body endorsed it; the mapping judgement is the author's.",
+    "iso_42001 and iso_27001 clause arrays are intentionally empty: the ISO standards are paywalled and no clause text was opened. The additive fields iso_themes_42001 / iso_themes_27001 hold unverified theme names only, with no clause numbers.",
+    "OWASP and ATLAS entries reflect the live sites on 2026-11-01. OWASP has announced a 2026 list that was not checked; ATLAS IDs change over time."
+  ],
+  "entries": [
+    {
+      "family": "direct override",
+      "owasp_llm_2025": [
+        "LLM01"
+      ],
+      "mitre_atlas": [
+        "AML.T0051",
+        "AML.T0051.000"
+      ],
+      "iso_42001": [],
+      "iso_27001": [],
+      "iso_themes_42001": [
+        "AI risk assessment and treatment",
+        "AI system security and robustness testing"
+      ],
+      "iso_themes_27001": [
+        "Information security risk assessment",
+        "Secure system engineering / security testing"
+      ],
+      "uk": [
+        {
+          "source": "NCSC",
+          "ref": "NCSC blog 'Prompt injection is not SQL injection (it may be worse)', 8 Dec 2025",
+          "url": "https://www.ncsc.gov.uk/blog-post/prompt-injection-is-not-sql-injection",
+          "note": "Position that injection may not be fully preventable, so reduce risk and impact rather than rely on blocking."
+        },
+        {
+          "source": "DSIT AI Cyber Security Code of Practice",
+          "ref": "Provision 2.2 (Principle 2)",
+          "url": "https://www.gov.uk/government/publications/ai-cyber-security-code-of-practice/code-of-practice-for-the-cyber-security-of-ai",
+          "note": "Requires AI systems to be designed and implemented to withstand adversarial attacks and unexpected inputs."
+        }
+      ],
+      "verified": true,
+      "notes": "OWASP LLM01 page covers direct injection. ATLAS T0051.000 is titled 'Direct' under LLM Prompt Injection."
+    },
+    {
+      "family": "system prompt extraction",
+      "owasp_llm_2025": [
+        "LLM07",
+        "LLM02"
+      ],
+      "mitre_atlas": [
+        "AML.T0069.002",
+        "AML.T0051.000"
+      ],
+      "iso_42001": [],
+      "iso_27001": [],
+      "iso_themes_42001": [
+        "AI risk assessment and treatment",
+        "Documentation of AI system information"
+      ],
+      "iso_themes_27001": [
+        "Information leakage prevention",
+        "Secrets handling"
+      ],
+      "uk": [
+        {
+          "source": "DSIT AI Cyber Security Code of Practice",
+          "ref": "Provision 2.2 (Principle 2)",
+          "url": "https://www.gov.uk/government/publications/ai-cyber-security-code-of-practice/code-of-practice-for-the-cyber-security-of-ai",
+          "note": "Requires AI systems to be designed and implemented to withstand adversarial attacks and unexpected inputs."
+        }
+      ],
+      "verified": true,
+      "notes": "LLM07 page: system prompts must not be treated as a secret or security control. ATLAS AML.T0069.002 is 'System Prompt' under 'Discover LLM System Information'. Older ATLAS ID AML.T0056 'LLM Meta Prompt Extraction' was NOT found in the current matrix, so it is deliberately not used."
+    },
+    {
+      "family": "authority impersonation",
+      "owasp_llm_2025": [
+        "LLM01"
+      ],
+      "mitre_atlas": [
+        "AML.T0051",
+        "AML.T0051.000"
+      ],
+      "iso_42001": [],
+      "iso_27001": [],
+      "iso_themes_42001": [
+        "AI risk assessment and treatment",
+        "Human oversight of AI systems"
+      ],
+      "iso_themes_27001": [
+        "Access control and least privilege",
+        "Secure system engineering",
+        "Privileged access management"
+      ],
+      "uk": [
+        {
+          "source": "NCSC",
+          "ref": "NCSC blog 'Prompt injection is not SQL injection (it may be worse)', 8 Dec 2025",
+          "url": "https://www.ncsc.gov.uk/blog-post/prompt-injection-is-not-sql-injection",
+          "note": "Source says an LLM's privileges should drop to that of the party whose content it processes; an unverifiable authority claim should not raise them."
+        },
+        {
+          "source": "DSIT AI Cyber Security Code of Practice",
+          "ref": "Provision 2.6 (Principle 2)",
+          "url": "https://www.gov.uk/government/publications/ai-cyber-security-code-of-practice/code-of-practice-for-the-cyber-security-of-ai",
+          "note": "Permissions granted to AI systems on other systems should be only as required and risk assessed."
+        }
+      ],
+      "verified": true,
+      "notes": "ATLAS AML.T0073 'Impersonation' exists but its description was not read, so it is not mapped. DSIT mapping is a judgement from provision 2.6, not a statement about impersonation."
+    },
+    {
+      "family": "persona hijack",
+      "owasp_llm_2025": [
+        "LLM01"
+      ],
+      "mitre_atlas": [
+        "AML.T0054",
+        "AML.T0051.000"
+      ],
+      "iso_42001": [],
+      "iso_27001": [],
+      "iso_themes_42001": [
+        "AI risk assessment and treatment",
+        "AI system security and robustness testing"
+      ],
+      "iso_themes_27001": [
+        "Information security risk assessment",
+        "Secure system engineering / security testing"
+      ],
+      "uk": [
+        {
+          "source": "DSIT AI Cyber Security Code of Practice",
+          "ref": "Provision 2.2 (Principle 2)",
+          "url": "https://www.gov.uk/government/publications/ai-cyber-security-code-of-practice/code-of-practice-for-the-cyber-security-of-ai",
+          "note": "Requires AI systems to be designed and implemented to withstand adversarial attacks and unexpected inputs."
+        }
+      ],
+      "verified": true,
+      "notes": "ATLAS AML.T0054 is 'LLM Jailbreak'; its mitigations section mentions multi-turn, multilingual, encoded and multimodal jailbreaks. OWASP LLM01 page covers jailbreaking."
+    },
+    {
+      "family": "prompt sandwich",
+      "owasp_llm_2025": [
+        "LLM01"
+      ],
+      "mitre_atlas": [
+        "AML.T0051",
+        "AML.T0051.000"
+      ],
+      "iso_42001": [],
+      "iso_27001": [],
+      "iso_themes_42001": [
+        "AI risk assessment and treatment",
+        "AI system security and robustness testing"
+      ],
+      "iso_themes_27001": [
+        "Information security risk assessment",
+        "Secure system engineering / security testing"
+      ],
+      "uk": [
+        {
+          "source": "DSIT AI Cyber Security Code of Practice",
+          "ref": "Provision 2.2 (Principle 2)",
+          "url": "https://www.gov.uk/government/publications/ai-cyber-security-code-of-practice/code-of-practice-for-the-cyber-security-of-ai",
+          "note": "Requires AI systems to be designed and implemented to withstand adversarial attacks and unexpected inputs."
+        }
+      ],
+      "verified": true,
+      "notes": "No framework entry is specific to the sandwich pattern; mapped to the general direct-injection technique."
+    },
+    {
+      "family": "hypothetical framing",
+      "owasp_llm_2025": [
+        "LLM01"
+      ],
+      "mitre_atlas": [
+        "AML.T0054"
+      ],
+      "iso_42001": [],
+      "iso_27001": [],
+      "iso_themes_42001": [
+        "AI risk assessment and treatment",
+        "AI system security and robustness testing"
+      ],
+      "iso_themes_27001": [
+        "Information security risk assessment",
+        "Secure system engineering / security testing"
+      ],
+      "uk": [
+        {
+          "source": "DSIT AI Cyber Security Code of Practice",
+          "ref": "Provision 2.2 (Principle 2)",
+          "url": "https://www.gov.uk/government/publications/ai-cyber-security-code-of-practice/code-of-practice-for-the-cyber-security-of-ai",
+          "note": "Requires AI systems to be designed and implemented to withstand adversarial attacks and unexpected inputs."
+        }
+      ],
+      "verified": true,
+      "notes": "Framing is a jailbreak style. Mapped to AML.T0054 'LLM Jailbreak' as the closest title."
+    },
+    {
+      "family": "multi-turn persistence",
+      "owasp_llm_2025": [
+        "LLM01"
+      ],
+      "mitre_atlas": [
+        "AML.T0051.000",
+        "AML.T0080"
+      ],
+      "iso_42001": [],
+      "iso_27001": [],
+      "iso_themes_42001": [
+        "AI system monitoring and performance evaluation"
+      ],
+      "iso_themes_27001": [
+        "Logging and monitoring"
+      ],
+      "uk": [
+        {
+          "source": "DSIT AI Cyber Security Code of Practice",
+          "ref": "Provision 2.2 (Principle 2)",
+          "url": "https://www.gov.uk/government/publications/ai-cyber-security-code-of-practice/code-of-practice-for-the-cyber-security-of-ai",
+          "note": "Requires AI systems to be designed and implemented to withstand adversarial attacks and unexpected inputs."
+        },
+        {
+          "source": "DSIT AI Cyber Security Code of Practice",
+          "ref": "Principle 12 (Provision 12.1)",
+          "url": "https://www.gov.uk/government/publications/ai-cyber-security-code-of-practice/code-of-practice-for-the-cyber-security-of-ai",
+          "note": "System Operators should log system and user actions; supports detection of injection attempts."
+        }
+      ],
+      "verified": false,
+      "notes": "OWASP LLM01 page does not mention persistence or memory. AML.T0080 'AI Agent Context Poisoning' is a title-level match only; its description was not read. Treat as a candidate."
+    },
+    {
+      "family": "context flooding",
+      "owasp_llm_2025": [
+        "LLM01"
+      ],
+      "mitre_atlas": [
+        "AML.T0051.000"
+      ],
+      "iso_42001": [],
+      "iso_27001": [],
+      "iso_themes_42001": [
+        "AI risk assessment and treatment",
+        "AI system security and robustness testing"
+      ],
+      "iso_themes_27001": [
+        "Information security risk assessment",
+        "Secure system engineering / security testing"
+      ],
+      "uk": [
+        {
+          "source": "DSIT AI Cyber Security Code of Practice",
+          "ref": "Provision 2.2 (Principle 2)",
+          "url": "https://www.gov.uk/government/publications/ai-cyber-security-code-of-practice/code-of-practice-for-the-cyber-security-of-ai",
+          "note": "Requires AI systems to be designed and implemented to withstand adversarial attacks and unexpected inputs."
+        }
+      ],
+      "verified": true,
+      "notes": "No OWASP or ATLAS page read describes long-context flooding specifically. LLM10 Unbounded Consumption is about resource exhaustion, a different risk, so it is not mapped."
+    },
+    {
+      "family": "encoded payload",
+      "owasp_llm_2025": [
+        "LLM01"
+      ],
+      "mitre_atlas": [
+        "AML.T0051",
+        "AML.T0068"
+      ],
+      "iso_42001": [],
+      "iso_27001": [],
+      "iso_themes_42001": [
+        "AI risk assessment and treatment",
+        "AI system security and robustness testing"
+      ],
+      "iso_themes_27001": [
+        "Information security risk assessment",
+        "Secure system engineering / security testing"
+      ],
+      "uk": [
+        {
+          "source": "DSIT AI Cyber Security Code of Practice",
+          "ref": "Provision 2.2 (Principle 2)",
+          "url": "https://www.gov.uk/government/publications/ai-cyber-security-code-of-practice/code-of-practice-for-the-cyber-security-of-ai",
+          "note": "Requires AI systems to be designed and implemented to withstand adversarial attacks and unexpected inputs."
+        },
+        {
+          "source": "DSIT AI Cyber Security Code of Practice",
+          "ref": "Provision 5.4.1 (Principle 5)",
+          "url": "https://www.gov.uk/government/publications/ai-cyber-security-code-of-practice/code-of-practice-for-the-cyber-security-of-ai",
+          "note": "Checks and sanitisation of data and inputs."
+        }
+      ],
+      "verified": true,
+      "notes": "OWASP LLM01 page lists Base64 / emoji obfuscation as an attack scenario. ATLAS AML.T0068 is 'LLM Prompt Obfuscation'."
+    },
+    {
+      "family": "role token spoofing",
+      "owasp_llm_2025": [
+        "LLM01"
+      ],
+      "mitre_atlas": [
+        "AML.T0051.000"
+      ],
+      "iso_42001": [],
+      "iso_27001": [],
+      "iso_themes_42001": [
+        "AI risk assessment and treatment",
+        "AI system security and robustness testing"
+      ],
+      "iso_themes_27001": [
+        "Information security risk assessment",
+        "Secure system engineering / security testing"
+      ],
+      "uk": [
+        {
+          "source": "DSIT AI Cyber Security Code of Practice",
+          "ref": "Provision 2.2 (Principle 2)",
+          "url": "https://www.gov.uk/government/publications/ai-cyber-security-code-of-practice/code-of-practice-for-the-cyber-security-of-ai",
+          "note": "Requires AI systems to be designed and implemented to withstand adversarial attacks and unexpected inputs."
+        }
+      ],
+      "verified": true,
+      "notes": "No page read names control-token spoofing. Mapped to direct injection as the nearest fit."
+    },
+    {
+      "family": "RAG injection",
+      "owasp_llm_2025": [
+        "LLM01",
+        "LLM08"
+      ],
+      "mitre_atlas": [
+        "AML.T0051.001",
+        "AML.T0066",
+        "AML.T0070"
+      ],
+      "iso_42001": [],
+      "iso_27001": [],
+      "iso_themes_42001": [
+        "Data governance for AI systems",
+        "AI risk assessment and treatment"
+      ],
+      "iso_themes_27001": [
+        "Information classification and protection",
+        "Access control",
+        "Information leakage prevention"
+      ],
+      "uk": [
+        {
+          "source": "NCSC",
+          "ref": "NCSC blog 'Prompt injection is not SQL injection (it may be worse)', 8 Dec 2025",
+          "url": "https://www.ncsc.gov.uk/blog-post/prompt-injection-is-not-sql-injection",
+          "note": "Source advises treating content from external parties as carrying that party's low privilege."
+        },
+        {
+          "source": "DSIT AI Cyber Security Code of Practice",
+          "ref": "Provision 2.2 (Principle 2)",
+          "url": "https://www.gov.uk/government/publications/ai-cyber-security-code-of-practice/code-of-practice-for-the-cyber-security-of-ai",
+          "note": "Requires AI systems to be designed and implemented to withstand adversarial attacks and unexpected inputs."
+        }
+      ],
+      "verified": true,
+      "notes": "OWASP LLM08 scenario 1 (hidden instruction text in a document ingested into a RAG knowledge base) and LLM01 RAG scenario read. ATLAS: T0051.001 'Indirect', T0066 'Retrieval Content Crafting', T0070 'RAG Poisoning'."
+    },
+    {
+      "family": "web/comment injection",
+      "owasp_llm_2025": [
+        "LLM01",
+        "LLM05"
+      ],
+      "mitre_atlas": [
+        "AML.T0051.001",
+        "AML.T0093"
+      ],
+      "iso_42001": [],
+      "iso_27001": [],
+      "iso_themes_42001": [
+        "Data governance for AI systems",
+        "AI risk assessment and treatment"
+      ],
+      "iso_themes_27001": [
+        "Information classification and protection",
+        "Access control",
+        "Information leakage prevention"
+      ],
+      "uk": [
+        {
+          "source": "NCSC",
+          "ref": "NCSC blog 'Prompt injection is not SQL injection (it may be worse)', 8 Dec 2025",
+          "url": "https://www.ncsc.gov.uk/blog-post/prompt-injection-is-not-sql-injection",
+          "note": "Source gives the example of not letting an LLM that processes mail from outsiders reach privileged tools."
+        },
+        {
+          "source": "DSIT AI Cyber Security Code of Practice",
+          "ref": "Provision 2.6 (Principle 2)",
+          "url": "https://www.gov.uk/government/publications/ai-cyber-security-code-of-practice/code-of-practice-for-the-cyber-security-of-ai",
+          "note": "Permissions granted to AI systems on other systems should be only as required and risk assessed."
+        }
+      ],
+      "verified": true,
+      "notes": "OWASP LLM05 scenario 2 is a website summariser with an injected prompt. ATLAS T0093 'Prompt Infiltration via Public-Facing Application' matched on title and on the page loading; description not read."
+    },
+    {
+      "family": "metadata injection",
+      "owasp_llm_2025": [
+        "LLM01"
+      ],
+      "mitre_atlas": [
+        "AML.T0051.001"
+      ],
+      "iso_42001": [],
+      "iso_27001": [],
+      "iso_themes_42001": [
+        "Data governance for AI systems",
+        "AI risk assessment and treatment"
+      ],
+      "iso_themes_27001": [
+        "Information classification and protection",
+        "Access control",
+        "Information leakage prevention"
+      ],
+      "uk": [
+        {
+          "source": "DSIT AI Cyber Security Code of Practice",
+          "ref": "Provision 2.2 (Principle 2)",
+          "url": "https://www.gov.uk/government/publications/ai-cyber-security-code-of-practice/code-of-practice-for-the-cyber-security-of-ai",
+          "note": "Requires AI systems to be designed and implemented to withstand adversarial attacks and unexpected inputs."
+        }
+      ],
+      "verified": true,
+      "notes": "No page read names document metadata specifically; mapped to indirect injection (external files are an LLM01 indirect source)."
+    },
+    {
+      "family": "tool-call hijack",
+      "owasp_llm_2025": [
+        "LLM01",
+        "LLM06"
+      ],
+      "mitre_atlas": [
+        "AML.T0053",
+        "AML.T0051"
+      ],
+      "iso_42001": [],
+      "iso_27001": [],
+      "iso_themes_42001": [
+        "AI risk assessment and treatment",
+        "Human oversight of AI systems"
+      ],
+      "iso_themes_27001": [
+        "Access control and least privilege",
+        "Secure system engineering",
+        "Privileged access management"
+      ],
+      "uk": [
+        {
+          "source": "NCSC",
+          "ref": "NCSC blog 'Prompt injection is not SQL injection (it may be worse)', 8 Dec 2025",
+          "url": "https://www.ncsc.gov.uk/blog-post/prompt-injection-is-not-sql-injection",
+          "note": "Source warns tool access raises impact toward the worst case of giving an attacker direct access to those tools."
+        },
+        {
+          "source": "DSIT AI Cyber Security Code of Practice",
+          "ref": "Provision 2.6 (Principle 2)",
+          "url": "https://www.gov.uk/government/publications/ai-cyber-security-code-of-practice/code-of-practice-for-the-cyber-security-of-ai",
+          "note": "Permissions granted to AI systems on other systems should be only as required and risk assessed."
+        },
+        {
+          "source": "DSIT AI Cyber Security Code of Practice",
+          "ref": "Provision 6.3 (Principle 6)",
+          "url": "https://www.gov.uk/government/publications/ai-cyber-security-code-of-practice/code-of-practice-for-the-cyber-security-of-ai",
+          "note": "Separation and least privilege backed by technical controls."
+        }
+      ],
+      "verified": true,
+      "notes": "OWASP LLM06 covers excessive functionality, permissions and autonomy in tools. ATLAS AML.T0053 'AI Agent Tool Invocation'."
+    },
+    {
+      "family": "cross-tool forgery",
+      "owasp_llm_2025": [
+        "LLM06",
+        "LLM01",
+        "LLM02"
+      ],
+      "mitre_atlas": [
+        "AML.T0053",
+        "AML.T0086"
+      ],
+      "iso_42001": [],
+      "iso_27001": [],
+      "iso_themes_42001": [
+        "AI risk assessment and treatment",
+        "Human oversight of AI systems"
+      ],
+      "iso_themes_27001": [
+        "Access control and least privilege",
+        "Secure system engineering",
+        "Privileged access management"
+      ],
+      "uk": [
+        {
+          "source": "NCSC",
+          "ref": "NCSC blog 'Prompt injection is not SQL injection (it may be worse)', 8 Dec 2025",
+          "url": "https://www.ncsc.gov.uk/blog-post/prompt-injection-is-not-sql-injection",
+          "note": "Same least-privilege and blast-radius reasoning applies across connected tools."
+        },
+        {
+          "source": "DSIT AI Cyber Security Code of Practice",
+          "ref": "Provision 2.6 (Principle 2)",
+          "url": "https://www.gov.uk/government/publications/ai-cyber-security-code-of-practice/code-of-practice-for-the-cyber-security-of-ai",
+          "note": "Permissions granted to AI systems on other systems should be only as required and risk assessed."
+        },
+        {
+          "source": "DSIT AI Cyber Security Code of Practice",
+          "ref": "Provision 6.3 (Principle 6)",
+          "url": "https://www.gov.uk/government/publications/ai-cyber-security-code-of-practice/code-of-practice-for-the-cyber-security-of-ai",
+          "note": "Separation and least privilege backed by technical controls."
+        }
+      ],
+      "verified": true,
+      "notes": "ATLAS AML.T0086 'Exfiltration via AI Agent Tool Invocation' matched on title; description not read."
+    },
+    {
+      "family": "second-order injection",
+      "owasp_llm_2025": [
+        "LLM01"
+      ],
+      "mitre_atlas": [
+        "AML.T0051.002",
+        "AML.T0080"
+      ],
+      "iso_42001": [],
+      "iso_27001": [],
+      "iso_themes_42001": [
+        "AI system monitoring and performance evaluation"
+      ],
+      "iso_themes_27001": [
+        "Logging and monitoring"
+      ],
+      "uk": [
+        {
+          "source": "DSIT AI Cyber Security Code of Practice",
+          "ref": "Provision 2.2 (Principle 2)",
+          "url": "https://www.gov.uk/government/publications/ai-cyber-security-code-of-practice/code-of-practice-for-the-cyber-security-of-ai",
+          "note": "Requires AI systems to be designed and implemented to withstand adversarial attacks and unexpected inputs."
+        },
+        {
+          "source": "DSIT AI Cyber Security Code of Practice",
+          "ref": "Principle 12 (Provision 12.1)",
+          "url": "https://www.gov.uk/government/publications/ai-cyber-security-code-of-practice/code-of-practice-for-the-cyber-security-of-ai",
+          "note": "System Operators should log system and user actions; supports detection of injection attempts."
+        }
+      ],
+      "verified": false,
+      "notes": "ATLAS AML.T0051.002 is titled 'Triggered' and AML.T0080 'AI Agent Context Poisoning'. Both are title-level matches; descriptions not read. Treat as candidates."
+    }
+  ]
+}

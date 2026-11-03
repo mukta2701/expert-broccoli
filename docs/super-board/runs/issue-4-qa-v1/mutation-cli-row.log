@@ -1,0 +1,19 @@
+Mutation: omit PASS metrics row, leave confusion matrix unchanged.
+test_shipped_synthetic_corpus_and_cli (tests.test_validate_scorer.ValidationCommandTests.test_shipped_synthetic_corpus_and_cli) ... FAIL
+
+======================================================================
+FAIL: test_shipped_synthetic_corpus_and_cli (tests.test_validate_scorer.ValidationCommandTests.test_shipped_synthetic_corpus_and_cli)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/.claude/worktrees/issue-4-qa/ai-prompt-injection-security-testing/tests/test_validate_scorer.py", line 96, in test_shipped_synthetic_corpus_and_cli
+    self.assertRegex(result.stdout,
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+                     rf"(?m)^{outcome}\s+\d+\.\d+\s+\d+\.\d+\s*$")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Regex didn't match: '(?m)^PASS\\s+\\d+\\.\\d+\\s+\\d+\\.\\d+\\s*$' not found in 'Synthetic labelled set; not evidence of real-world accuracy.\nAI-authored reference judgements; not independently human-reviewed.\nScorer: canary-expectation-1.0\nResponses: 48\nOutcome  precision  recall\nPARTIAL  0.696      1.000\nFAIL     1.000      0.750\nPrecision = correct predictions / predictions of that outcome.\nRecall = correct predictions / reference labels of that outcome.\nUndefined precision or recall is reported as 0.000.\nConfusion matrix (rows=reference, columns=predicted)\n            PASS PARTIAL    FAIL\nPASS          11       5       0\nPARTIAL        0      16       0\nFAIL           2       2      12\n'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.037s
+
+FAILED (failures=1)
+Exit: 1

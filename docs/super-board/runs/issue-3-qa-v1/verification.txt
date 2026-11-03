@@ -1,0 +1,29 @@
+Python 3.9.6
+..............
+----------------------------------------------------------------------
+Ran 14 tests in 0.111s
+
+OK
+Python 3.14.6
+..............
+----------------------------------------------------------------------
+Ran 14 tests in 0.110s
+
+OK
+1.7.12
+installed from Homebrew
+built with go1.26.3 compiler for darwin/arm64
+actionlint: PASS
+Apache canonical text byte comparison: PASS
+cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30  LICENSE
+cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30  /tmp/sb-issue3-qa/apache-canonical.txt
+git diff --check: PASS
+
+Codex QA refresh, 2026-11-02
+cmp LICENSE /tmp/sb3-qa-refresh/apache.txt: PASS (fresh official download)
+SHA-256: cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30
+actionlint .github/workflows/tests.yml: PASS
+python3.14 -m unittest discover -s ai-prompt-injection-security-testing/tests -t ai-prompt-injection-security-testing: 14 tests, 0.119s, OK
+cd ai-prompt-injection-security-testing && python3 -m unittest discover -s tests -t .: 14 tests, 0.100s, OK
+Python versions: 3.14.6 and 3.15.2 respectively
+git diff --check: PASS
