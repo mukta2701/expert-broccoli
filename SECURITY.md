@@ -3,7 +3,7 @@
 ## Reporting a vulnerability
 
 Report repository vulnerabilities privately through
-[GitHub Security Advisories](https://github.com/mukta2701/expert-broccoli/security/advisories).
+[GitHub Security Advisories](https://github.com/mukta2701/tripwire/security/advisories).
 Choose **Report a vulnerability** and include the affected commit, impact, and
 minimal reproduction steps using synthetic data and the local mock only.
 

@@ -1,4 +1,4 @@
-# Prompt-injection evidence pipeline
+# Tripwire: prompt-injection evidence pipeline
 
 A small, standard-library Python harness that runs 16 synthetic prompt-injection cases against a chatbot and turns the results into reviewable evidence. It runs against a local mock by default and can also call a model you run yourself. Not a safety verdict or certification; see Limits.
 
