@@ -57,6 +57,15 @@ python3 -m tester.test_runner --target openai_compat \
 
 Small local models can be slow on long replies, and a single request that exceeds the socket timeout (30 seconds by default) aborts the whole run without saving any output, so `--timeout 180` raises the limit. The `mode` field in the saved results is the mock's behaviour flag and is ignored for real models. This sends each prompt to an OpenAI-compatible chat endpoint (Ollama is what I used). Loopback addresses need no extra flag. Any other target needs `--i-have-authorization` and written permission from its owner; see [SECURITY.md](../SECURITY.md). The adapter sends one user message per prompt, no system prompt, and does not send the canary. It disables proxies and redirects and never retries. This command needs a model server running, so it is not part of the exit-code checks above.
 
+### One command
+
+`run.sh` runs the cases, prints each attack and reply as it finishes, and saves a dated folder under `runs/` (results, manifest, `risk_register.md`, `evidence_pack.html`). Defaults: 5 trials, 180 s timeout. The PASS / FAIL / PARTIAL counts in the live tally are scorer labels, not a verdict.
+
+```bash
+./run.sh llama3.2:3b --open                        # local Ollama, opens the HTML report
+./run.sh --target mock --mode unsafe --trials 1    # no model needed
+```
+
 ## What the evidence shows
 
 ### Scorer validation (48 synthetic labelled responses)

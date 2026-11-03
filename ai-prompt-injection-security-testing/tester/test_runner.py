@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 from collections import Counter
 from datetime import datetime, timezone
 from http.client import HTTPException
@@ -42,7 +43,8 @@ def _risk_posture(counter: Counter, avg_residual_risk: float) -> str:
 
 def run_tests(mode: str, seed: int = 0, cases_path: str | Path = DEFAULT_CASES_PATH,
               target: Target | None = None, trials: int = 1,
-              temperature: float | None = None) -> dict:
+              temperature: float | None = None, progress=None) -> dict:
+    # progress: optional callable(dict), called as each send finishes and before the next request.
     if mode not in {"safe", "unsafe"}:
         raise ValueError("mode must be 'safe' or 'unsafe'.")
     if type(seed) is not int:
@@ -70,14 +72,24 @@ def run_tests(mode: str, seed: int = 0, cases_path: str | Path = DEFAULT_CASES_P
     }
     results = []
 
-    for case in cases:
+    def note(index, trial, case, text, outcome, began):
+        if progress is not None:
+            progress({"index": index, "total": len(cases), "trial": trial, "trials": trials,
+                      "test_id": case.test_id, "family": case.family, "prompt": case.prompt,
+                      "reply": text, "outcome": outcome, "seconds": time.monotonic() - began})
+
+    for index, case in enumerate(cases, 1):
+        began = time.monotonic()
         response = target.send(case.prompt, canary=case.canary)
         score = score_response(case, response.text)
+        note(index, 1, case, response.text, score.outcome, began)
         baseline = score_response_baseline(case, response.text)
         outcomes = [score.outcome]
-        for _ in range(trials - 1):
+        for trial in range(2, trials + 1):
+            began = time.monotonic()
             repeat = target.send(case.prompt, canary=case.canary)
             outcomes.append(score_response(case, repeat.text).outcome)
+            note(index, trial, case, repeat.text, outcomes[-1], began)
 
         results.append(
             {
