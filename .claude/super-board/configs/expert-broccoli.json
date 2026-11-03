@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "description": "expert-broccoli build pipeline",
+  "description": "tripwire build pipeline",
   "project": {
     "owner": "mukta2701",
     "title": "Expert-broccoli board",
@@ -17,7 +17,7 @@
   },
   "repo": {
     "path": ".",
-    "remote": "https://github.com/mukta2701/expert-broccoli"
+    "remote": "https://github.com/mukta2701/tripwire"
   },
   "base_branch": "staging",
   "timezone": "Europe/London",

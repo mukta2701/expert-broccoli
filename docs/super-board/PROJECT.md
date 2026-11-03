@@ -1,4 +1,4 @@
-# expert-broccoli
+# Tripwire
 
 Public, sanitised portfolio repo. One project: `ai-prompt-injection-security-testing/`, a clean-room demo of prompt-injection and jailbreak testing against a local mock chatbot.
 

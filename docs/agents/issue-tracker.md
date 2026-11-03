@@ -1,6 +1,6 @@
 # Issue tracker
 
-GitHub Issues on `mukta2701/expert-broccoli`, driven by the project board `Expert-broccoli board` (#2).
+GitHub Issues on `mukta2701/tripwire`, driven by the project board `Tripwire board` (#2).
 
 ## Ticket format
 ```markdown

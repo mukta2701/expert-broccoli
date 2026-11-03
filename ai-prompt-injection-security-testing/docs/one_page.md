@@ -1,4 +1,4 @@
-# Prompt-injection evidence pipeline: one page
+# Tripwire: prompt-injection evidence pipeline, one page
 
 ## Problem
 
